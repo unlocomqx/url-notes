@@ -1,0 +1,23 @@
+{
+  "name": "notes_by_url",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.4",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/webextension-polyfill": "^0.12.3",
+    "svelte": "^5.22.6",
+    "svelte-check": "^4.1.5",
+    "tslib": "^2.8.1",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.1",
+    "vite-plugin-web-extension": "^4.4.3",
+    "webextension-polyfill": "^0.12.0"
+  }
+}
