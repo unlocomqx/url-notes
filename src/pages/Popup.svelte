@@ -74,7 +74,25 @@
       .then((tabs) => {
         const tab = tabs[0]
         context_url = tab.url || ''
+        const url = new URL(context_url)
+        let stored_contexts = localStorage.getItem('context')
+        let contexts = JSON.parse(stored_contexts || '{}')
+        if (contexts[url.origin]) {
+          context = contexts[url.origin]
+        } else {
+          context = 'page'
+        }
       })
+  })
+
+  $effect(() => {
+    if (context_url) {
+      const url = new URL(context_url)
+      let stored_contexts = localStorage.getItem('context')
+      let contexts = JSON.parse(stored_contexts || '{}')
+      contexts[url.origin] = context
+      localStorage.setItem('context', JSON.stringify(contexts))
+    }
   })
 </script>
 
@@ -90,7 +108,7 @@
 
   <div class="notes flex flex-col gap-2">
     {#each $notes as {id, content} (id)}
-      <div class="group relative border-2 border-base-300 rounded-lg focus-within:border-2 focus-within:border-accent">
+      <div class="group relative border-2 border-base-300 rounded-lg">
         <Editor {id} {content} onchange={(content) => {
           db.notes.update(id, {content})
         }}/>

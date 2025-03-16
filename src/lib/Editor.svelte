@@ -52,11 +52,7 @@
         Underline,
         BubbleMenu.configure({
           element: bubble_menu,
-          tippyOptions: {duration: 100, theme: 'local', maxWidth: 450, appendTo: document.body},
-          shouldShow: () => {
-            // only show the bubble menu for images and links
-            return true
-          },
+          tippyOptions: {duration: 100, theme: 'local', maxWidth: 450, appendTo: document.body}
         }),
         Placeholder.configure({placeholder})
       ],
@@ -174,10 +170,16 @@
   <label class="modal-backdrop" for="link_modal-{id}">Close</label>
 </div>
 
-<style>
+<style lang="postcss">
+    @import "tailwindcss";
+
+    @plugin "daisyui";
+
+    :global(.tiptap) {
+        @apply bg-base-200 rounded-lg focus-within:ring-2 focus-within:ring-accent;
+    }
+
     :global(.tiptap a) {
-        color: var(--color-primary);
-        text-decoration: underline;
-        cursor: pointer;
+        @apply text-base-content font-medium underline cursor-pointer;
     }
 </style>

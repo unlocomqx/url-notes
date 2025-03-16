@@ -56,10 +56,10 @@
           />
           <div data-theme={value} class="bg-transparent -skew-x-12">
             <div class="flex border border-base-300">
-            <div class="bg-primary w-2 h-6 "></div>
-            <div class="bg-primary-content w-2 h-6"></div>
-            <div class="bg-secondary w-2 h-6"></div>
-            <div class="bg-accent w-2 h-6"></div>
+              <div class="bg-primary w-2 h-6 "></div>
+              <div class="bg-primary-content w-2 h-6"></div>
+              <div class="bg-secondary w-2 h-6"></div>
+              <div class="bg-accent w-2 h-6"></div>
             </div>
           </div>
           <span class="text-left grow">{name}</span>
