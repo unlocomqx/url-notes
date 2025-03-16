@@ -12,7 +12,8 @@
 
   let element: HTMLDivElement
   let bubble_menu: HTMLDivElement
-  let editor = $state<Editor | undefined>()
+  let editor = $state.raw<Editor | undefined>()
+  let rerender_key = $state(0)
 
   let bold = true
   let italic = true
@@ -26,12 +27,6 @@
     if (!editor) {
       return
     }
-    if (editor.isActive('link')) {
-      editor.chain().focus().unsetLink().run()
-      link_modal_open = false
-      return
-    }
-
 
     // empty
     if (url === '') {
@@ -71,9 +66,10 @@
         },
       },
       content,
-      onTransaction: () => {
+      onTransaction: ({editor: instance}) => {
         // force re-render so `editor.isActive` works as expected
-        editor = editor
+        editor = instance
+        rerender_key += 1
         handleChange()
       },
     })
@@ -92,16 +88,19 @@
       editor.destroy()
     }
   })
+
+  let is_bold = $derived.by(() => rerender_key && editor?.isActive('bold'))
+  let is_italic = $derived.by(() => rerender_key && editor?.isActive('italic'))
+  let is_underline = $derived.by(() => rerender_key && editor?.isActive('underline'))
+  let is_link = $derived.by(() => rerender_key && editor?.isActive('link'))
 </script>
 
 <div bind:this={bubble_menu}
      class="join shadow-md">
-  {#if editor}
+  {#if editor && rerender_key}
     {#if bold}
       <button type="button"
-              class="btn join-item {editor.isActive('bold')
-          ? 'text-primary'
-          : ''}"
+              class="btn join-item {is_bold ? 'text-primary' : ''}"
               onclick={() => editor?.chain().focus().toggleBold().run()}
       >
         <Icon icon="ic:baseline-format-bold"/>
@@ -110,9 +109,7 @@
 
     {#if italic}
       <button type="button"
-              class="btn join-item {editor.isActive('italic')
-          ? 'text-primary'
-          : ''}"
+              class="btn join-item {is_italic ? 'text-primary' : ''}"
               onclick={() => editor?.chain().focus().toggleItalic().run()}
       >
         <Icon icon="ic:baseline-format-italic"/>
@@ -121,9 +118,7 @@
 
     {#if underline}
       <button type="button"
-              class="btn join-item {editor.isActive('underline')
-          ? 'text-primary'
-          : ''}"
+              class="btn join-item {is_underline ? 'text-primary' : ''}"
               onclick={() => editor?.chain().focus().toggleUnderline().run()}
       >
         <Icon icon="ic:baseline-format-underlined"/>
@@ -132,12 +127,21 @@
 
     {#if link}
       <label for="link_modal-{id}"
-             class="btn join-item {editor.isActive('link')
-          ? 'text-primary'
-          : ''}"
+             class="btn join-item {is_link ? 'text-primary': ''}"
       >
         <Icon icon="ic:baseline-link"/>
       </label>
+    {/if}
+
+    {#if is_link}
+      <button type="button"
+              class="btn join-item"
+              onclick={() => {
+                editor?.chain().focus().unsetLink().run()
+              }}
+      >
+        <Icon icon="ic:baseline-link-off"/>
+      </button>
     {/if}
   {/if}
 </div>

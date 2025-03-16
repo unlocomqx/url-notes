@@ -75,7 +75,6 @@
         context_url = tab.url || ''
       })
   })
-  $inspect({context_url})
 </script>
 
 <div class="p-1 flex flex-col gap-2">
