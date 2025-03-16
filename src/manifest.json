@@ -16,6 +16,16 @@
   },
   "background": {
     "{{chrome}}.service_worker": "src/background.ts",
-    "{{firefox}}.scripts": ["src/background.ts"]
-  }
+    "{{firefox}}.scripts": [
+      "src/background.ts"
+    ]
+  },
+  "permissions": [
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
 }

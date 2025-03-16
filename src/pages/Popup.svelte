@@ -3,22 +3,79 @@
   import {type Context, db} from "../db"
   import {liveQuery} from "dexie"
   import Editor from "../lib/Editor.svelte"
+  import browser from "webextension-polyfill"
+  import {onMount} from "svelte"
 
   let context = $state<Context>('page')
+  let context_url = $state<string>('')
 
   async function AddNote() {
+    let url: string | undefined = ''
+
+    const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0]
+
+    if (context === 'page') {
+      if (tab.url) {
+        const page_url = new URL(tab.url)
+        url = getPageUrl(page_url)
+      }
+    } else if (context === 'website') {
+      if (tab.url) {
+        const page_url = new URL(tab.url)
+        url = page_url.origin
+      }
+    }
+
+    if (!url) {
+      url = ''
+    }
+
     const id = await db.notes.add({
       context,
-      content: 'ABC'
+      content: '',
+      url
     })
 
     console.log(id)
   }
 
-  let filterNotes = (context: Context) => liveQuery(
-    () => db.notes.where('context').equals(context).toArray()
+  let filterNotes = (context: Context, context_url: string) => liveQuery(
+    () => {
+      let url = ''
+      if (context === 'global') {
+        url = ''
+      } else if (context === 'page') {
+        if (context_url) {
+          const page_url = new URL(context_url)
+          url = getPageUrl(page_url)
+        }
+      } else if (context === 'website') {
+        if (context_url) {
+          const page_url = new URL(context_url)
+          url = page_url.origin
+        }
+      }
+
+      return db.notes
+        .where({context, url})
+        .toArray()
+    }
   )
-  let notes = $derived(filterNotes(context))
+  let notes = $derived(filterNotes(context, context_url))
+
+  function getPageUrl(url: URL) {
+    let without_hash = url.href.replace(url.hash, '')
+    return without_hash.replace(/#$/, '')
+  }
+
+  onMount(() => {
+    browser.tabs.query({active: true, currentWindow: true})
+      .then((tabs) => {
+        const tab = tabs[0]
+        context_url = tab.url || ''
+      })
+  })
+  $inspect({context_url})
 </script>
 
 <div class="p-1 flex flex-col gap-2">
@@ -38,7 +95,7 @@
         <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
           <button class="btn btn-xs btn-error"
                   onclick={() => {
-                      if(confirm('Are you sure?')) {
+                      if(true || confirm('Are you sure?')) {
                         db.notes.delete(id)
                       }
                   }}

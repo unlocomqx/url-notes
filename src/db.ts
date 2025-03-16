@@ -4,7 +4,8 @@ export type Context = 'page' | 'website' | 'global'
 
 export type Note= {
   id: number
-  context: Context
+  context: Context,
+  url: string
   content: string
 }
 
@@ -17,7 +18,7 @@ const db = new Dexie('NotesDatabase') as Dexie & {
 
 // Schema declaration:
 db.version(1).stores({
-  notes: '++id, context, content'
+  notes: '++id, context, url, content'
 })
 
 export {db}
