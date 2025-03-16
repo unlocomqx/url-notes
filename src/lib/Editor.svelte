@@ -8,7 +8,7 @@
   import Underline from '@tiptap/extension-underline'
   import Icon from "@iconify/svelte"
 
-  let {id, content} = $props()
+  let {id, content, onchange} = $props()
 
   let element: HTMLDivElement
   let bubble_menu: HTMLDivElement
@@ -18,7 +18,7 @@
   let italic = true
   let underline = true
   let link = true
-  let placeholder = ''
+  let placeholder = 'Edit note...'
 
   const setLink = () => {
     if (!editor) {
@@ -46,11 +46,6 @@
       return
     }
 
-    if (!/^https?:\/\//.test(url)) {
-      window.alert('DIRECCIÓN INVÁLIDA!!')
-      return
-    }
-
     // update link
     editor.chain().focus().extendMarkRange('link').setLink({href: url}).run()
   }
@@ -61,7 +56,8 @@
       extensions: [
         StarterKit,
         Link.configure({
-          HTMLAttributes: {rel: null, target: null}
+          HTMLAttributes: {rel: null, target: null},
+          autolink: true
         }),
         Underline,
         BubbleMenu.configure({
@@ -79,9 +75,18 @@
       onTransaction: () => {
         // force re-render so `editor.isActive` works as expected
         editor = editor
+        handleChange()
       },
     })
   })
+
+  function handleChange() {
+    const html = editor?.getHTML()
+    if (html !== content) {
+      content = html
+      onchange(html)
+    }
+  }
 
   onDestroy(() => {
     if (editor) {
@@ -91,12 +96,12 @@
 </script>
 
 <div bind:this={bubble_menu}
-     class="flex gap-2 place-items-center border-2 border-base-300 rounded-lg p-1 bg-white shadow-md">
+     class="join shadow-md">
   {#if editor}
     {#if bold}
       <button type="button"
-              class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('bold')
-          ? 'ring ring-gray-100 text-white rounded'
+              class="btn join-item {editor.isActive('bold')
+          ? 'text-primary'
           : ''}"
               onclick={() => editor?.chain().focus().toggleBold().run()}
       >
@@ -106,8 +111,8 @@
 
     {#if italic}
       <button type="button"
-              class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('italic')
-          ? 'ring ring-gray-100 text-white rounded'
+              class="btn join-item {editor.isActive('italic')
+          ? 'text-primary'
           : ''}"
               onclick={() => editor?.chain().focus().toggleItalic().run()}
       >
@@ -117,8 +122,8 @@
 
     {#if underline}
       <button type="button"
-              class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('underline')
-          ? 'ring ring-gray-100 text-white rounded'
+              class="btn join-item {editor.isActive('underline')
+          ? 'text-primary'
           : ''}"
               onclick={() => editor?.chain().focus().toggleUnderline().run()}
       >
@@ -127,16 +132,37 @@
     {/if}
 
     {#if link}
-      <button type="button"
-              class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('link')
-          ? 'ring ring-gray-100 text-white rounded'
+      <label for="link_modal-{id}"
+             class="btn join-item {editor.isActive('link')
+          ? 'text-primary'
           : ''}"
-              onclick={setLink}
       >
         <Icon icon="ic:baseline-link"/>
-      </button>
+      </label>
     {/if}
   {/if}
 </div>
 
 <div bind:this={element}></div>
+
+<input class="modal-toggle" id="link_modal-{id}" type="checkbox"/>
+<div class="modal" role="dialog">
+  <div class="modal-box">
+    <h3 class="text-lg font-bold">Insert a link</h3>
+    <fieldset class="fieldset">
+      <div class="join">
+        <input class="input join-item" placeholder="Type here" type="text"/>
+        <button class="btn join-item" type="button">Add</button>
+      </div>
+    </fieldset>
+  </div>
+  <label class="modal-backdrop" for="link_modal-{id}">Close</label>
+</div>
+
+<style>
+    :global(.tiptap a) {
+        color: var(--color-primary);
+        text-decoration: underline;
+        cursor: pointer;
+    }
+</style>

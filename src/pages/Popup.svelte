@@ -31,7 +31,9 @@
   <div class="notes flex flex-col gap-2 min-h-16 border-2 border-base-300 rounded-lg p-4">
     {#each $notes as {id, content} (id)}
       <div class="border-2 border-base-300 rounded-lg focus-within:border-2 focus-within:border-accent">
-        <Editor {id} {content} />
+        <Editor {id} {content} onchange={(content) => {
+          db.notes.update(id, {content})
+        }}/>
       </div>
     {/each}
   </div>
