@@ -82,8 +82,6 @@
       editor.destroy()
     }
   })
-
-  $inspect({link_modal_open})
 </script>
 
 <div bind:this={bubble_menu}

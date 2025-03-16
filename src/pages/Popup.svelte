@@ -21,27 +21,45 @@
   let notes = $derived(filterNotes(context))
 </script>
 
-<div class="p-2 flex flex-col gap-2">
+<div class="p-1 flex flex-col gap-2">
   <div class="tabs tabs-border" role="tablist">
     <input aria-label="Page" bind:group={context} class="tab" name="context" type="radio" value="page"/>
     <input aria-label="Website" bind:group={context} class="tab" name="context" type="radio" value="website"/>
     <input aria-label="Global" bind:group={context} class="tab" name="context" type="radio" value="global"/>
   </div>
 
-  <div class="notes flex flex-col gap-2 min-h-16 border-2 border-base-300 rounded-lg p-4">
+  <div class="notes flex flex-col gap-2">
     {#each $notes as {id, content} (id)}
-      <div class="border-2 border-base-300 rounded-lg focus-within:border-2 focus-within:border-accent">
+      <div class="group relative border-2 border-base-300 rounded-lg focus-within:border-2 focus-within:border-accent">
         <Editor {id} {content} onchange={(content) => {
           db.notes.update(id, {content})
         }}/>
+
+        <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
+          <button class="btn btn-xs btn-error"
+                  onclick={() => {
+                      if(confirm('Are you sure?')) {
+                        db.notes.delete(id)
+                      }
+                  }}
+          >
+            <Icon icon="ic:baseline-delete"/>
+          </button>
+        </div>
       </div>
     {/each}
   </div>
 
   <div>
-    <button class="btn btn-primary" onclick={AddNote}>
+    <button class="btn btn-primary btn-sm" onclick={AddNote}>
       <Icon icon="ic:add"/>
-      New Note
+      {#if context === 'page'}
+        New page note
+      {:else if context === 'website'}
+        New website note
+      {:else}
+        New global note
+      {/if}
     </button>
   </div>
 </div>
