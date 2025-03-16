@@ -3,6 +3,7 @@
   import {type Context, db} from "../db"
   import {liveQuery} from "dexie"
   import { exec, init } from 'pell'
+  import Editor from "../lib/Editor.svelte"
 
   let context = $state<Context>('page')
 
@@ -46,9 +47,8 @@
 
   <div class="notes flex flex-col gap-2 min-h-16 border-2 border-base-300 rounded-lg p-4">
     {#each $notes as {id, content} (id)}
-      <div class="p-2 border-2 border-base-300 rounded-lg"
-           use:pell={{ id, content }}
-      >
+      <div class="border-2 border-base-300 rounded-lg focus-within:border-2 focus-within:border-accent">
+        <Editor {id} {content} />
       </div>
     {/each}
   </div>
