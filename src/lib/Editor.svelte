@@ -26,6 +26,12 @@
     if (!editor) {
       return
     }
+    if (editor.isActive('link')) {
+      editor.chain().focus().unsetLink().run()
+      link_modal_open = false
+      return
+    }
+
 
     // empty
     if (url === '') {
@@ -51,7 +57,11 @@
         Underline,
         BubbleMenu.configure({
           element: bubble_menu,
-          tippyOptions: {duration: 100, theme: 'local', maxWidth: 450, appendTo: document.body}
+          tippyOptions: {duration: 100, theme: 'local', maxWidth: 450, appendTo: document.body},
+          shouldShow: () => {
+            // only show the bubble menu for images and links
+            return true
+          },
         }),
         Placeholder.configure({placeholder})
       ],
