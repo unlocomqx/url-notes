@@ -158,10 +158,16 @@
         setLink()
       }}>
         <input bind:value={url} class="input" placeholder="https://" type="text"/>
-        <button class="btn btn-primary w-fit" onclick={setLink} type="submit">
-          <Icon icon="ic:baseline-insert-link"/>
-          Insert
-        </button>
+        <div class="flex justify-between">
+          <button class="btn btn-primary w-fit" onclick={setLink} type="submit">
+            <Icon icon="ic:baseline-insert-link"/>
+            Insert
+          </button>
+          <button class="btn w-fit" onclick={setLink} type="submit">
+            <Icon icon="ic:close"/>
+            Cancel
+          </button>
+        </div>
       </form>
     </fieldset>
   </div>
