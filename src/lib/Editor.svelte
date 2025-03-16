@@ -11,7 +11,7 @@
   let {id, content} = $props()
 
   let element: HTMLDivElement
-  let bmenu: HTMLDivElement
+  let bubble_menu: HTMLDivElement
   let editor = $state<Editor | undefined>()
 
   let bold = true
@@ -65,7 +65,7 @@
         }),
         Underline,
         BubbleMenu.configure({
-          element: bmenu,
+          element: bubble_menu,
           tippyOptions: {duration: 100, theme: 'local', maxWidth: 450, appendTo: document.body}
         }),
         Placeholder.configure({placeholder})
@@ -90,47 +90,48 @@
   })
 </script>
 
-<div bind:this={bmenu} class="flex gap-2 place-items-center border-2 border-base-300 rounded-lg p-1 bg-white shadow-md">
+<div bind:this={bubble_menu}
+     class="flex gap-2 place-items-center border-2 border-base-300 rounded-lg p-1 bg-white shadow-md">
   {#if editor}
     {#if bold}
-      <button
-          class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('bold')
+      <button type="button"
+              class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('bold')
           ? 'ring ring-gray-100 text-white rounded'
           : ''}"
-          on:click|preventDefault={() => editor?.chain().focus().toggleBold().run()}
+              onclick={() => editor?.chain().focus().toggleBold().run()}
       >
         <Icon icon="ic:baseline-format-bold"/>
       </button>
     {/if}
 
     {#if italic}
-      <button
-          class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('italic')
+      <button type="button"
+              class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('italic')
           ? 'ring ring-gray-100 text-white rounded'
           : ''}"
-          on:click|preventDefault={() => editor?.chain().focus().toggleItalic().run()}
+              onclick={() => editor?.chain().focus().toggleItalic().run()}
       >
         <Icon icon="ic:baseline-format-italic"/>
       </button>
     {/if}
 
     {#if underline}
-      <button
-          class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('underline')
+      <button type="button"
+              class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('underline')
           ? 'ring ring-gray-100 text-white rounded'
           : ''}"
-          on:click|preventDefault={() => editor?.chain().focus().toggleUnderline().run()}
+              onclick={() => editor?.chain().focus().toggleUnderline().run()}
       >
         <Icon icon="ic:baseline-format-underlined"/>
       </button>
     {/if}
 
     {#if link}
-      <button
-          class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('link')
+      <button type="button"
+              class="p-2 text-sm rounded-sm text-gray-700 hover:text-black hover:bg-gray-300 cursor-pointer {editor.isActive('link')
           ? 'ring ring-gray-100 text-white rounded'
           : ''}"
-          on:click|preventDefault={setLink}
+              onclick={setLink}
       >
         <Icon icon="ic:baseline-link"/>
       </button>
@@ -139,10 +140,3 @@
 </div>
 
 <div bind:this={element}></div>
-
-<style>
-    button.active {
-        background: black;
-        color: white;
-    }
-</style>
