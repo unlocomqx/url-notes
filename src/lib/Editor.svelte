@@ -134,15 +134,21 @@
 
 <div bind:this={element}></div>
 
-<input class="modal-toggle" id="link_modal-{id}" type="checkbox" bind:checked={link_modal_open}/>
+<input bind:checked={link_modal_open} class="modal-toggle" id="link_modal-{id}" type="checkbox"/>
 <div class="modal" role="dialog">
   <div class="modal-box">
     <h3 class="text-lg font-bold">Insert a link</h3>
     <fieldset class="fieldset">
-      <div class="join">
-        <input bind:value={url} class="input join-item" placeholder="Type here" type="text"/>
-        <button class="btn join-item" onclick={setLink} type="button">Insert</button>
-      </div>
+      <form class="flex flex-col gap-2" onsubmit={(e) => {
+        e.preventDefault()
+        setLink()
+      }}>
+        <input bind:value={url} class="input" placeholder="https://" type="text"/>
+        <button class="btn btn-primary w-fit" onclick={setLink} type="submit">
+          <Icon icon="ic:baseline-insert-link"/>
+          Insert
+        </button>
+      </form>
     </fieldset>
   </div>
   <label class="modal-backdrop" for="link_modal-{id}">Close</label>
