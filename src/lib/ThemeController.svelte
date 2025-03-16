@@ -22,8 +22,6 @@
   $effect(() => {
     document.documentElement.dataset.theme = current_theme.value
   })
-
-  $inspect(current_theme.value)
 </script>
 
 <div class="dropdown dropdown-bottom dropdown-end">
@@ -39,27 +37,44 @@
     </svg>
   </div>
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-  <ul class="dropdown-content bg-base-300 rounded-box z-1 w-52 p-2 shadow-2xl" tabindex="0">
+  <ul class="dropdown-content bg-base-300 rounded-box z-1 w-48 overflow-auto p-2 shadow-2xl" tabindex="0">
     {#each themes as {name, value}}
       <li>
-        <input
-            aria-label="{name}"
-            bind:group={current_theme.value}
-            class="theme-controller btn btn-sm btn-block btn-ghost justify-start"
+        <label
+            class="btn btn-sm btn-ghost grow flex items-center gap-2"
             class:active={current_theme.value === value}
-            name="theme-dropdown"
-            type="radio"
-            {value}/>
+            for="theme-{value}"
+        >
+          <input
+              aria-label="{name}"
+              bind:group={current_theme.value}
+              class="theme-controller hidden"
+              name="theme-dropdown"
+              type="radio"
+              id="theme-{value}"
+              {value}
+          />
+          <div data-theme={value} class="bg-transparent -skew-x-12">
+            <div class="flex border border-base-300">
+            <div class="bg-primary w-2 h-6 "></div>
+            <div class="bg-primary-content w-2 h-6"></div>
+            <div class="bg-secondary w-2 h-6"></div>
+            <div class="bg-accent w-2 h-6"></div>
+            </div>
+          </div>
+          <span class="text-left grow">{name}</span>
+        </label>
       </li>
     {/each}
   </ul>
 </div>
 
 <style lang="postcss">
-   @import "tailwindcss";
-   @plugin "daisyui";
+    @import "tailwindcss";
 
-  .active {
-    @apply bg-primary text-primary-content;
-  }
+    @plugin "daisyui";
+
+    .active {
+        @apply bg-primary text-primary-content;
+    }
 </style>

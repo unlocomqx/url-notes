@@ -79,7 +79,7 @@
 </script>
 
 <div class="p-1 flex flex-col gap-2">
-  <div class="flex justify-between">
+  <div class="flex justify-between items-center">
     <div class="tabs tabs-border" role="tablist">
       <input aria-label="Page" bind:group={context} class="tab" name="context" type="radio" value="page"/>
       <input aria-label="Website" bind:group={context} class="tab" name="context" type="radio" value="website"/>
