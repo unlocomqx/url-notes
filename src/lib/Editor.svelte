@@ -20,34 +20,23 @@
   let link = true
   let placeholder = 'Edit note...'
 
+  let url = $state('')
+  let link_modal_open = $state(false)
   const setLink = () => {
     if (!editor) {
-      return
-    }
-
-    if (editor.isActive('link')) {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run()
-
-      return
-    }
-
-    const previousUrl = editor.getAttributes('link').href
-    const url = window.prompt('URL', previousUrl)
-
-    // cancelled
-    if (url === null) {
       return
     }
 
     // empty
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run()
-
+      link_modal_open = false
       return
     }
 
     // update link
     editor.chain().focus().extendMarkRange('link').setLink({href: url}).run()
+    link_modal_open = false
   }
 
   onMount(() => {
@@ -93,6 +82,8 @@
       editor.destroy()
     }
   })
+
+  $inspect({link_modal_open})
 </script>
 
 <div bind:this={bubble_menu}
@@ -145,14 +136,14 @@
 
 <div bind:this={element}></div>
 
-<input class="modal-toggle" id="link_modal-{id}" type="checkbox"/>
+<input class="modal-toggle" id="link_modal-{id}" type="checkbox" bind:checked={link_modal_open}/>
 <div class="modal" role="dialog">
   <div class="modal-box">
     <h3 class="text-lg font-bold">Insert a link</h3>
     <fieldset class="fieldset">
       <div class="join">
-        <input class="input join-item" placeholder="Type here" type="text"/>
-        <button class="btn join-item" type="button">Add</button>
+        <input bind:value={url} class="input join-item" placeholder="Type here" type="text"/>
+        <button class="btn join-item" onclick={setLink} type="button">Insert</button>
       </div>
     </fieldset>
   </div>
