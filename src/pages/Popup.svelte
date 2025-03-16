@@ -2,7 +2,6 @@
   import Icon from "@iconify/svelte"
   import {type Context, db} from "../db"
   import {liveQuery} from "dexie"
-  import { exec, init } from 'pell'
   import Editor from "../lib/Editor.svelte"
 
   let context = $state<Context>('page')
@@ -20,23 +19,7 @@
     () => db.notes.where('context').equals(context).toArray()
   )
   let notes = $derived(filterNotes(context))
-
-  function pell(node: HTMLDivElement, { id, content }:{id: number, content: string}) {
-    const editor = init({
-      element: node,
-      onChange: (html: string) => {
-        db.notes.update(id, { content: html })
-      },
-      actions:['bold','link','italic','underline']
-    })
-
-    editor.content.innerHTML = content
-  }
 </script>
-
-<svelte:head>
-  <link rel="stylesheet" type="text/css" href="https://unpkg.com/pell/dist/pell.min.css">
-</svelte:head>
 
 <div class="p-2 flex flex-col gap-2">
   <div class="tabs tabs-border" role="tablist">
