@@ -11,6 +11,9 @@ importers:
       dexie:
         specifier: ^4.0.11
         version: 4.0.11
+      pell:
+        specifier: ^1.0.6
+        version: 1.0.6
       tailwindcss:
         specifier: ^4.0.14
         version: 4.0.14
@@ -27,6 +30,9 @@ importers:
       '@tsconfig/svelte':
         specifier: ^5.0.4
         version: 5.0.4
+      '@types/pell':
+        specifier: ^1.0.4
+        version: 1.0.4
       '@types/webextension-polyfill':
         specifier: ^0.12.3
         version: 0.12.3
@@ -489,6 +495,9 @@ packages:
 
   '@types/node@22.13.10':
     resolution: {integrity: sha512-I6LPUvlRH+O6VRUqYOcMudhaIdUVWfsjnZavnsraHvpBwaEyMN29ry+0UVJhImYL16xsscu0aske3yA+uPOWfw==}
+
+  '@types/pell@1.0.4':
+    resolution: {integrity: sha512-FY5lvXaZeLs7QF2nUkySCxDJ/3GKSRFAdjnrsMAUI0ybMM2hbS58CS/tIsxEiuJs8XdI5fVN0J1Bu7edzTKbPw==}
 
   '@types/webextension-polyfill@0.12.3':
     resolution: {integrity: sha512-F58aDVSeN/MjUGazXo/cPsmR76EvqQhQ1v4x23hFjUX0cfAJYE+JBWwiOGW36/VJGGxoH74sVlRIF3z7SJCKyg==}
@@ -1211,6 +1220,9 @@ packages:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
     engines: {node: '>=0.10.0'}
 
+  pell@1.0.6:
+    resolution: {integrity: sha512-wuackvgjFCHmVABy7ACSmY2u53w+TlYFrVL2hN6V3rGL/iWWwVXMw2uphpZSXNnqFQTI8nMpD3UNNX8+R4BAYw==}
+
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -1894,6 +1906,8 @@ snapshots:
     dependencies:
       undici-types: 6.20.0
 
+  '@types/pell@1.0.4': {}
+
   '@types/webextension-polyfill@0.12.3': {}
 
   acorn@8.14.1: {}
@@ -2564,6 +2578,8 @@ snapshots:
 
   path-is-absolute@1.0.1:
     optional: true
+
+  pell@1.0.6: {}
 
   picocolors@1.1.1: {}
 
