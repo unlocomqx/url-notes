@@ -5,11 +5,12 @@
   import Editor from "../lib/Editor.svelte"
   import browser from "webextension-polyfill"
   import {onMount} from "svelte"
+  import ThemeController from "../lib/ThemeController.svelte"
 
   let context = $state<Context>('page')
   let context_url = $state<string>('')
 
-  async function AddNote() {
+  async function addNote() {
     let url: string | undefined = ''
 
     const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0]
@@ -78,10 +79,13 @@
 </script>
 
 <div class="p-1 flex flex-col gap-2">
-  <div class="tabs tabs-border" role="tablist">
-    <input aria-label="Page" bind:group={context} class="tab" name="context" type="radio" value="page"/>
-    <input aria-label="Website" bind:group={context} class="tab" name="context" type="radio" value="website"/>
-    <input aria-label="Global" bind:group={context} class="tab" name="context" type="radio" value="global"/>
+  <div class="flex justify-between">
+    <div class="tabs tabs-border" role="tablist">
+      <input aria-label="Page" bind:group={context} class="tab" name="context" type="radio" value="page"/>
+      <input aria-label="Website" bind:group={context} class="tab" name="context" type="radio" value="website"/>
+      <input aria-label="Global" bind:group={context} class="tab" name="context" type="radio" value="global"/>
+    </div>
+    <ThemeController/>
   </div>
 
   <div class="notes flex flex-col gap-2">
@@ -106,8 +110,8 @@
     {/each}
   </div>
 
-  <div>
-    <button class="btn btn-primary btn-sm" onclick={AddNote}>
+  <div class="p-2">
+    <button class="btn btn-primary btn-sm" onclick={addNote}>
       <Icon icon="ic:add"/>
       {#if context === 'page'}
         New page note
