@@ -12,7 +12,7 @@
 
   let element: HTMLDivElement
   let bubble_menu: HTMLDivElement
-  let editor = $state.raw<Editor | undefined>()
+  let editor = $state<Editor | undefined>()
   let rerender_key = $state(0)
 
   let bold = true
