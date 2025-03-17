@@ -21,6 +21,11 @@
     ]
   },
   "permissions": [
-    "activeTab"
-  ]
+    "activeTab",
+    "storage"
+  ],
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": false
+  }
 }

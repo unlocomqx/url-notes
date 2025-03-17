@@ -94,6 +94,14 @@
       localStorage.setItem('context', JSON.stringify(contexts))
     }
   })
+
+  function openSettings(){
+    if (browser.runtime.openOptionsPage) {
+      browser.runtime.openOptionsPage();
+    } else {
+      window.open(browser.runtime.getURL('options.html'));
+    }
+  }
 </script>
 
 <div class="p-1 flex flex-col gap-2">
@@ -104,6 +112,9 @@
       <input aria-label="Global" bind:group={context} class="tab" name="context" type="radio" value="global"/>
     </div>
     <ThemeController/>
+    <button class="btn btn-primary btn-sm" title="Settings" onclick={openSettings}>
+      <Icon icon="ic:baseline-settings"/>
+    </button>
   </div>
 
   <div class="notes flex flex-col gap-2">
