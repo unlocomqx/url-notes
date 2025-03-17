@@ -21,11 +21,6 @@
     ]
   },
   "permissions": [
-    "tabs",
     "activeTab"
-  ],
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
   ]
 }
