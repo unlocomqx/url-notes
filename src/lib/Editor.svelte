@@ -66,8 +66,6 @@
         // force re-render so `editor.isActive` works as expected
         editor = instance
         rerender_key += 1
-      },
-      onBlur: () => {
         handleChange()
       }
     })
@@ -98,7 +96,7 @@
   {#if editor && rerender_key}
     {#if bold}
       <button type="button"
-              class="btn join-item {is_bold ? 'text-primary' : ''}"
+              class="btn join-item {is_bold ? 'bg-primary text-primary-content' : ''}"
               onclick={() => editor?.chain().focus().toggleBold().run()}
       >
         <Icon icon="ic:baseline-format-bold"/>
@@ -107,7 +105,7 @@
 
     {#if italic}
       <button type="button"
-              class="btn join-item {is_italic ? 'text-primary' : ''}"
+              class="btn join-item {is_italic ? 'bg-primary text-primary-content' : ''}"
               onclick={() => editor?.chain().focus().toggleItalic().run()}
       >
         <Icon icon="ic:baseline-format-italic"/>
@@ -116,7 +114,7 @@
 
     {#if underline}
       <button type="button"
-              class="btn join-item {is_underline ? 'text-primary' : ''}"
+              class="btn join-item {is_underline ? 'bg-primary text-primary-content' : ''}"
               onclick={() => editor?.chain().focus().toggleUnderline().run()}
       >
         <Icon icon="ic:baseline-format-underlined"/>
@@ -125,7 +123,7 @@
 
     {#if link}
       <label for="link_modal-{id}"
-             class="btn join-item {is_link ? 'text-primary': ''}"
+             class="btn join-item {is_link ? 'bg-primary text-primary-content': ''}"
       >
         <Icon icon="ic:baseline-link"/>
       </label>

@@ -68,32 +68,36 @@
     await browser.storage.sync.set({
       [origin]: notes,
     })
+
+    note_rows = filterNotes(context, context_url)
   }
 
-  async function saveNote(note: Note, new_content: string) {
-    const {id, origin, context} = note
+  function saveNote(note: Note) {
+    return async (new_content: string) => {
+      const {id, origin, context} = note
 
-    const notes = await browser.storage.sync.get(origin)
-      .then(notes => notes[origin]) as Notes
+      const notes = await browser.storage.sync.get(origin)
+        .then(notes => notes[origin]) as Notes
 
-    if (notes[context] === undefined) {
-      return
+      if (notes[context] === undefined) {
+        return
+      }
+
+      let note_index = notes[context].findIndex((n: Note) => n.id === id)
+
+      if (note_index === -1) {
+        return
+      }
+
+      notes[context][note_index] = {
+        ...notes[context][note_index],
+        content: new_content,
+      }
+
+      await browser.storage.sync.set({
+        [origin]: notes,
+      })
     }
-
-    let note_index = notes[context].findIndex((n: Note) => n.id === id)
-
-    if (note_index === -1) {
-      return
-    }
-
-    notes[context][note_index] = {
-      ...notes[context][note_index],
-      content: new_content,
-    }
-
-    await browser.storage.sync.set({
-      [origin]: notes,
-    })
   }
 
   async function deleteNote(note: Note) {
@@ -117,9 +121,11 @@
     await browser.storage.sync.set({
       [origin]: notes,
     })
+
+    note_rows = filterNotes(context, context_url)
   }
 
-  async function filterNotes(context: Context, context_url: string, update_trigger) {
+  async function filterNotes(context: Context, context_url: string) {
     let origin = ''
     if (context === 'global') {
       origin = 'global'
@@ -143,15 +149,18 @@
     return notes[context]
   }
 
-  let update_trigger = $state(0)
-  let notes = $derived(filterNotes(context, context_url, update_trigger))
+  let note_rows = $state(filterNotes(context, context_url))
+
+  $effect(() => {
+    note_rows = filterNotes(context, context_url)
+  })
 
   onMount(() => {
     browser.storage.onChanged.addListener((changes, namespace) => {
       if (namespace !== 'sync') {
         return
       }
-      update_trigger += 1
+      // notes = filterNotes(context, context_url)
     })
   })
 
@@ -211,13 +220,13 @@
   </div>
 
   <div class="notes flex flex-col gap-2">
-    {#await notes}
+    {#await note_rows}
       Loading...
     {:then notes_list}
       {#each notes_list as note (note.id)}
         {@const {id, content} = note}
         <div class="group relative border-2 border-base-300 rounded-lg">
-          <Editor {id} {content} onchange={(new_content) => saveNote(note, new_content)}/>
+          <Editor {id} {content} onchange={saveNote(note)}/>
 
           <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
             <button class="btn btn-xs btn-error"
