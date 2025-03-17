@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: light, silk, dark, retro, garden, forest, pastel, garden, dracula, acid, night, dim, abyss, nord, sunset;
+}
+
+html,
+body {
+    width: 400px;
+    height: 600px;
+    padding: 0;
+    margin: 0;
+}
