@@ -66,8 +66,10 @@
         // force re-render so `editor.isActive` works as expected
         editor = instance
         rerender_key += 1
-        handleChange()
       },
+      onBlur: () => {
+        handleChange()
+      }
     })
   })
 

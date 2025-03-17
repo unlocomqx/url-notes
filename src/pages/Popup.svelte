@@ -1,7 +1,6 @@
 <script lang="ts">
   import Icon from "@iconify/svelte"
-  import {type Context, db} from "../db"
-  import {liveQuery} from "dexie"
+  import {type Context} from "../db"
   import Editor from "../lib/Editor.svelte"
   import browser from "webextension-polyfill"
   import {onMount} from "svelte"
@@ -10,8 +9,18 @@
   let context = $state<Context>('page')
   let context_url = $state<string>('')
 
+  type Note = {
+    id: string
+    origin: string
+    context: Context
+    url: string
+    content: string
+  }
+  type Notes = Record<Context, Note[]>
+
   async function addNote() {
     let url: string | undefined = ''
+    let origin: string = 'global'
 
     const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0]
 
@@ -19,11 +28,13 @@
       if (tab.url) {
         const page_url = new URL(tab.url)
         url = getPageUrl(page_url)
+        origin = page_url.origin
       }
     } else if (context === 'website') {
       if (tab.url) {
         const page_url = new URL(tab.url)
         url = page_url.origin
+        origin = page_url.origin
       }
     }
 
@@ -31,38 +42,118 @@
       url = ''
     }
 
-    const id = await db.notes.add({
+    let notes = await browser.storage.sync.get(origin)
+      .then(notes => notes[origin]) as Notes
+
+    if (notes[context] === undefined) {
+      notes = {
+        "page": [],
+        "website": [],
+        "global": [],
+      }
+    }
+
+    if (!notes[context]) {
+      notes[context] = []
+    }
+
+    notes[context].push({
+      id: new Date().getTime().toString(),
+      origin,
       context,
+      url,
       content: '',
-      url
     })
 
-    console.log(id)
+    await browser.storage.sync.set({
+      [origin]: notes,
+    })
   }
 
-  let filterNotes = (context: Context, context_url: string) => liveQuery(
-    () => {
-      let url = ''
-      if (context === 'global') {
-        url = ''
-      } else if (context === 'page') {
-        if (context_url) {
-          const page_url = new URL(context_url)
-          url = getPageUrl(page_url)
-        }
-      } else if (context === 'website') {
-        if (context_url) {
-          const page_url = new URL(context_url)
-          url = page_url.origin
-        }
-      }
+  async function saveNote(note: Note, new_content: string) {
+    const {id, origin, context} = note
 
-      return db.notes
-        .where({context, url})
-        .toArray()
+    const notes = await browser.storage.sync.get(origin)
+      .then(notes => notes[origin]) as Notes
+
+    if (notes[context] === undefined) {
+      return
     }
-  )
-  let notes = $derived(filterNotes(context, context_url))
+
+    let note_index = notes[context].findIndex((n: Note) => n.id === id)
+
+    if (note_index === -1) {
+      return
+    }
+
+    notes[context][note_index] = {
+      ...notes[context][note_index],
+      content: new_content,
+    }
+
+    await browser.storage.sync.set({
+      [origin]: notes,
+    })
+  }
+
+  async function deleteNote(note: Note) {
+    const {id, origin, context} = note
+
+    const notes = await browser.storage.sync.get(origin)
+      .then(notes => notes[origin]) as Notes
+
+    if (notes[context] === undefined) {
+      return
+    }
+
+    let note_index = notes[context].findIndex((n: Note) => n.id === id)
+
+    if (note_index === -1) {
+      return
+    }
+
+    notes[context].splice(note_index, 1)
+
+    await browser.storage.sync.set({
+      [origin]: notes,
+    })
+  }
+
+  async function filterNotes(context: Context, context_url: string, update_trigger) {
+    let origin = ''
+    if (context === 'global') {
+      origin = 'global'
+    } else if (context === 'page') {
+      if (context_url) {
+        const page_url = new URL(context_url)
+        origin = page_url.origin
+      }
+    } else if (context === 'website') {
+      if (context_url) {
+        const page_url = new URL(context_url)
+        origin = page_url.origin
+      }
+    }
+
+    const notes = await browser.storage.sync.get(origin).then(notes => notes[origin]) as Notes
+    if (!notes) {
+      return []
+    }
+
+    return notes[context]
+  }
+
+  let update_trigger = $state(0)
+  let notes = $derived(filterNotes(context, context_url, update_trigger))
+
+  onMount(() => {
+    browser.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace !== 'sync') {
+        return
+      }
+      update_trigger += 1
+    })
+  })
 
   function getPageUrl(url: URL) {
     let without_hash = url.href.replace(url.hash, '')
@@ -74,13 +165,15 @@
       .then((tabs) => {
         const tab = tabs[0]
         context_url = tab.url || ''
-        const url = new URL(context_url)
-        let stored_contexts = localStorage.getItem('context')
-        let contexts = JSON.parse(stored_contexts || '{}')
-        if (contexts[url.origin]) {
-          context = contexts[url.origin]
-        } else {
-          context = 'page'
+        if (context_url) {
+          const url = new URL(context_url)
+          let stored_contexts = localStorage.getItem('context')
+          let contexts = JSON.parse(stored_contexts || '{}')
+          if (contexts[url.origin]) {
+            context = contexts[url.origin]
+          } else {
+            context = 'page'
+          }
         }
       })
   })
@@ -95,11 +188,11 @@
     }
   })
 
-  function openSettings(){
+  function openSettings() {
     if (browser.runtime.openOptionsPage) {
-      browser.runtime.openOptionsPage();
+      browser.runtime.openOptionsPage()
     } else {
-      window.open(browser.runtime.getURL('options.html'));
+      window.open(browser.runtime.getURL('options.html'))
     }
   }
 </script>
@@ -112,31 +205,34 @@
       <input aria-label="Global" bind:group={context} class="tab" name="context" type="radio" value="global"/>
     </div>
     <ThemeController/>
-    <button class="btn btn-primary btn-sm" title="Settings" onclick={openSettings}>
+    <button class="btn btn-primary btn-sm" onclick={openSettings} title="Settings">
       <Icon icon="ic:baseline-settings"/>
     </button>
   </div>
 
   <div class="notes flex flex-col gap-2">
-    {#each $notes as {id, content} (id)}
-      <div class="group relative border-2 border-base-300 rounded-lg">
-        <Editor {id} {content} onchange={(content) => {
-          db.notes.update(id, {content})
-        }}/>
+    {#await notes}
+      Loading...
+    {:then notes_list}
+      {#each notes_list as note (note.id)}
+        {@const {id, content} = note}
+        <div class="group relative border-2 border-base-300 rounded-lg">
+          <Editor {id} {content} onchange={(new_content) => saveNote(note, new_content)}/>
 
-        <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
-          <button class="btn btn-xs btn-error"
-                  onclick={() => {
+          <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
+            <button class="btn btn-xs btn-error"
+                    onclick={() => {
                       if(true || confirm('Are you sure?')) {
-                        db.notes.delete(id)
+                        deleteNote(note)
                       }
                   }}
-          >
-            <Icon icon="ic:baseline-delete"/>
-          </button>
+            >
+              <Icon icon="ic:baseline-delete"/>
+            </button>
+          </div>
         </div>
-      </div>
-    {/each}
+      {/each}
+    {/await}
   </div>
 
   <div class="p-2">
