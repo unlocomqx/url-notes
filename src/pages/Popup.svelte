@@ -72,6 +72,15 @@
     note_rows = filterNotes(context, context_url)
   }
 
+  async function addNoteFromClipboard() {
+    const text = await navigator.clipboard.readText()
+    if (!text) {
+      return
+    }
+
+    return addNote(text)
+  }
+
   function pasteNote(e: ClipboardEvent) {
     const text = e.clipboardData?.getData('text/plain')
     if (!text) {
@@ -259,7 +268,7 @@
   </div>
 
   <div class="flex gap-2 p-2">
-    <button class="btn btn-primary btn-sm" onclick={addNote}>
+    <button class="btn btn-primary btn-sm" onclick={() => addNote()}>
       <Icon icon="ic:add"/>
       {#if context === 'page'}
         New page note
@@ -269,7 +278,7 @@
         New global note
       {/if}
     </button>
-    <button class="btn btn-primary btn-sm" onclick={addNote} title="Add from clipboard (ctrl + v)">
+    <button class="btn btn-primary btn-sm" onclick={addNoteFromClipboard} title="Add from clipboard (ctrl + v)">
       <Icon icon="ic:baseline-content-paste"/>
     </button>
     <button class="btn btn-primary btn-sm" onclick={addNote} title="Add from current selection">
