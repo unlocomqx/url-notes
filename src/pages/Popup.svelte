@@ -241,7 +241,8 @@
           </div>
         </div>
       {:else}
-        <div class="group relative border-2 border-base-300 text-base-content/60 p-2 bg-base-200 rounded-lg">
+        <div class="group relative border-2 border-base-300 text-base-content/60 p-2 bg-base-200 rounded-lg flex items-center gap-1">
+          <Icon icon="ic:baseline-speaker-notes-off"/>
           Click the button below to add a note in the current context.
         </div>
       {/each}

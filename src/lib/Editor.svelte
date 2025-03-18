@@ -45,6 +45,7 @@
       element: element,
       extensions: [
         StarterKit,
+        Placeholder.configure({placeholder}),
         Link.configure({
           HTMLAttributes: {rel: null, target: null},
           autolink: true
@@ -54,7 +55,6 @@
           element: bubble_menu,
           tippyOptions: {duration: 100, theme: 'local', maxWidth: 450, appendTo: document.body}
         }),
-        Placeholder.configure({placeholder})
       ],
       editorProps: {
         attributes: {
@@ -177,5 +177,13 @@
 
     :global(.tiptap a) {
         @apply text-base-content font-medium underline cursor-pointer;
+    }
+
+    :global(.tiptap p.is-editor-empty:first-child:before) {
+        color: oklch(from var(--color-neutral-content) l c h / 0.6);
+        content: attr(data-placeholder);
+        float: left;
+        height: 0;
+        pointer-events: none
     }
 </style>
