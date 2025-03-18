@@ -18,7 +18,7 @@
   }
   type Notes = Record<Context, Note[]>
 
-  async function addNote() {
+  async function addNote(content = '') {
     let url: string | undefined = ''
     let origin: string = 'global'
 
@@ -62,7 +62,7 @@
       origin,
       context,
       url,
-      content: '',
+      content,
     })
 
     await browser.storage.sync.set({
@@ -70,6 +70,15 @@
     })
 
     note_rows = filterNotes(context, context_url)
+  }
+
+  function pasteNote(e: ClipboardEvent) {
+    const text = e.clipboardData?.getData('text/plain')
+    if (!text) {
+      return
+    }
+
+    addNote(text)
   }
 
   function saveNote(note: Note) {
@@ -206,7 +215,7 @@
   }
 </script>
 
-<div class="p-1 flex flex-col gap-2">
+<div class="p-1 flex flex-col gap-2" onpaste={pasteNote}>
   <div class="flex justify-between items-center">
     <div class="tabs tabs-border" role="tablist">
       <input aria-label="Page" bind:group={context} class="tab" name="context" type="radio" value="page"/>
@@ -220,12 +229,11 @@
   </div>
 
   <div class="notes flex flex-col gap-2">
-    {#await note_rows}
-      Loading...
-    {:then notes_list}
+    {#await note_rows then notes_list}
       {#each notes_list as note (note.id)}
         {@const {id, content} = note}
-        <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent">
+        <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent"
+             onpaste={(e) => e.stopPropagation()}>
           <Editor {id} {content} onchange={saveNote(note)}/>
 
           <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
@@ -241,7 +249,8 @@
           </div>
         </div>
       {:else}
-        <div class="group relative border-2 border-base-300 text-base-content/60 p-2 bg-base-200 rounded-lg flex items-center gap-1">
+        <div
+            class="group relative border-2 border-base-300 text-base-content/60 p-2 bg-base-200 rounded-lg flex items-center gap-1">
           <Icon icon="ic:baseline-speaker-notes-off"/>
           Click the button below to add a note in the current context.
         </div>
@@ -249,7 +258,7 @@
     {/await}
   </div>
 
-  <div class="p-2">
+  <div class="flex gap-2 p-2">
     <button class="btn btn-primary btn-sm" onclick={addNote}>
       <Icon icon="ic:add"/>
       {#if context === 'page'}
@@ -259,6 +268,12 @@
       {:else}
         New global note
       {/if}
+    </button>
+    <button class="btn btn-primary btn-sm" onclick={addNote} title="Add from clipboard (ctrl + v)">
+      <Icon icon="ic:baseline-content-paste"/>
+    </button>
+    <button class="btn btn-primary btn-sm" onclick={addNote} title="Add from current selection">
+      <Icon icon="mdi:invoice-text-plus-outline"/>
     </button>
   </div>
 </div>
