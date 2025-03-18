@@ -25,5 +25,11 @@
   "host_permissions": [
     "http://*/*",
     "https://*/*"
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "notes-by-url@prestalife.net",
+      "strict_min_version": "58.0"
+    }
+  }
 }
