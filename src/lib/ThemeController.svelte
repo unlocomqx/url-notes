@@ -25,7 +25,7 @@
 </script>
 
 <div class="dropdown dropdown-bottom dropdown-end">
-  <div class="btn m-1" role="button" tabindex="0">
+  <div class="btn btn-sm m-1" role="button" tabindex="0">
     Theme
     <svg
         class="inline-block h-2 w-2 fill-current opacity-60"
