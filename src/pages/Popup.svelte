@@ -81,6 +81,30 @@
     return addNote(text)
   }
 
+  async function addNoteFromSelection() {
+    browser.tabs.query({active: true, currentWindow: true})
+      .then(async (tabs) => {
+        const tab = tabs[0]
+        if (!tab.id) {
+          return
+        }
+        const selection = await browser.scripting.executeScript({
+          target: {tabId: tab.id},
+          func: () => {
+            return window?.getSelection()?.toString()
+          }
+        })
+
+        const [{result}] = selection
+
+        if(!result) {
+          return
+        }
+
+        return addNote(result as string)
+      })
+  }
+
   function pasteNote(e: ClipboardEvent) {
     const text = e.clipboardData?.getData('text/plain')
 
@@ -281,10 +305,11 @@
         New global note
       {/if}
     </button>
-    <button class="btn btn-primary btn-sm" onclick={addNoteFromClipboard} title="Add from clipboard (or press ctrl + v)">
+    <button class="btn btn-primary btn-sm" onclick={addNoteFromClipboard}
+            title="Add from clipboard (or press ctrl + v)">
       <Icon icon="ic:baseline-content-paste"/>
     </button>
-    <button class="btn btn-primary btn-sm" onclick={addNote} title="Add from current selection">
+    <button class="btn btn-primary btn-sm" onclick={addNoteFromSelection} title="Add from current selection">
       <Icon icon="mdi:invoice-text-plus-outline"/>
     </button>
   </div>
