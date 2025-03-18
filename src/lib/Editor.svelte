@@ -142,7 +142,9 @@
   {/if}
 </div>
 
-<div bind:this={element}></div>
+<div onpaste={(e) => e.stopPropagation()}>
+  <div bind:this={element}></div>
+</div>
 
 <input bind:checked={link_modal_open} class="modal-toggle" id="link_modal-{id}" type="checkbox"/>
 <div class="modal" role="dialog">

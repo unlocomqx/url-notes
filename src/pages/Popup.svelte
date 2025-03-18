@@ -83,6 +83,7 @@
 
   function pasteNote(e: ClipboardEvent) {
     const text = e.clipboardData?.getData('text/plain')
+    console.log({text})
     if (!text) {
       return
     }
@@ -222,9 +223,13 @@
       window.open(browser.runtime.getURL('options.html'))
     }
   }
+
+  onMount(() => {
+    document.addEventListener('paste', pasteNote)
+  })
 </script>
 
-<div class="p-1 flex flex-col gap-2" onpaste={pasteNote}>
+<div class="p-1 flex flex-col gap-2">
   <div class="flex justify-between items-center">
     <div class="tabs tabs-border" role="tablist">
       <input aria-label="Page" bind:group={context} class="tab" name="context" type="radio" value="page"/>
@@ -241,14 +246,13 @@
     {#await note_rows then notes_list}
       {#each notes_list as note (note.id)}
         {@const {id, content} = note}
-        <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent"
-             onpaste={(e) => e.stopPropagation()}>
+        <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent">
           <Editor {id} {content} onchange={saveNote(note)}/>
 
           <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
             <button class="btn btn-xs btn-error"
                     onclick={() => {
-                      if(true || confirm('Are you sure?')) {
+                      if(confirm('Are you sure?')) {
                         deleteNote(note)
                       }
                   }}
@@ -278,7 +282,7 @@
         New global note
       {/if}
     </button>
-    <button class="btn btn-primary btn-sm" onclick={addNoteFromClipboard} title="Add from clipboard (ctrl + v)">
+    <button class="btn btn-primary btn-sm" onclick={addNoteFromClipboard} title="Add from clipboard (or press ctrl + v)">
       <Icon icon="ic:baseline-content-paste"/>
     </button>
     <button class="btn btn-primary btn-sm" onclick={addNote} title="Add from current selection">
