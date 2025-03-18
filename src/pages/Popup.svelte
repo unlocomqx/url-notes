@@ -83,7 +83,7 @@
 
   function pasteNote(e: ClipboardEvent) {
     const text = e.clipboardData?.getData('text/plain')
-    console.log({text})
+
     if (!text) {
       return
     }
@@ -223,11 +223,10 @@
       window.open(browser.runtime.getURL('options.html'))
     }
   }
-
-  onMount(() => {
-    document.addEventListener('paste', pasteNote)
-  })
 </script>
+
+
+<svelte:body onpaste={pasteNote}/>
 
 <div class="p-1 flex flex-col gap-2">
   <div class="flex justify-between items-center">
