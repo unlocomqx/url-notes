@@ -239,14 +239,6 @@
       localStorage.setItem('context', JSON.stringify(contexts))
     }
   })
-
-  function openSettings() {
-    if (browser.runtime.openOptionsPage) {
-      browser.runtime.openOptionsPage()
-    } else {
-      window.open(browser.runtime.getURL('options.html'))
-    }
-  }
 </script>
 
 
@@ -260,9 +252,9 @@
       <input aria-label="Global" bind:group={context} class="tab" name="context" type="radio" value="global"/>
     </div>
     <ThemeController/>
-    <button class="btn btn-primary btn-sm" onclick={openSettings} title="Settings">
-      <Icon icon="ic:baseline-settings"/>
-    </button>
+    <a href="https://github.com/unlocomqx/url-notes" target="_blank" class="btn btn-primary btn-sm" title="Open GitHub repo">
+      <Icon icon="mdi:github"/>
+    </a>
   </div>
 
   <div class="notes flex flex-col gap-2">
