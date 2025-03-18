@@ -45,7 +45,7 @@
     let notes = await browser.storage.sync.get(origin)
       .then(notes => notes[origin]) as Notes
 
-    if (notes[context] === undefined) {
+    if (!notes?.[context]) {
       notes = {
         "page": [],
         "website": [],
@@ -225,7 +225,7 @@
     {:then notes_list}
       {#each notes_list as note (note.id)}
         {@const {id, content} = note}
-        <div class="group relative border-2 border-base-300 rounded-lg">
+        <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent">
           <Editor {id} {content} onchange={saveNote(note)}/>
 
           <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
@@ -239,6 +239,10 @@
               <Icon icon="ic:baseline-delete"/>
             </button>
           </div>
+        </div>
+      {:else}
+        <div class="group relative border-2 border-base-300 text-base-content/60 p-2 bg-base-200 rounded-lg">
+          Click the button below to add a note in the current context.
         </div>
       {/each}
     {/await}

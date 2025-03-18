@@ -58,7 +58,7 @@
       ],
       editorProps: {
         attributes: {
-          class: 'p-2 focus:outline-none',
+          class: 'focus:outline-none',
         },
       },
       content,
@@ -174,10 +174,6 @@
     @import "tailwindcss";
 
     @plugin "daisyui";
-
-    :global(.tiptap) {
-        @apply bg-base-200 rounded-lg focus-within:ring-2 focus-within:ring-accent;
-    }
 
     :global(.tiptap a) {
         @apply text-base-content font-medium underline cursor-pointer;
