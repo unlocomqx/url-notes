@@ -147,7 +147,7 @@
 </div>
 
 <input bind:checked={link_modal_open} class="modal-toggle" id="link_modal-{id}" type="checkbox"/>
-<div class="modal" role="dialog">
+<div class="modal" role="dialog" onpaste={(e) => e.stopPropagation()}>
   <div class="modal-box">
     <h3 class="text-lg font-bold">Insert a link</h3>
     <fieldset class="fieldset">
@@ -182,7 +182,7 @@
     }
 
     :global(.tiptap p.is-editor-empty:first-child:before) {
-        color: oklch(from var(--color-neutral-content) l c h / 0.6);
+        color: oklch(from var(--color-base-content) l c h / 0.6);
         content: attr(data-placeholder);
         float: left;
         height: 0;
