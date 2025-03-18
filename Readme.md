@@ -4,5 +4,8 @@
 <p>
 A simple note-taking extension that allows you to take notes on any webpage.
 </p>
+
+![Marquee](./public/marquee.png)
+
 </div>
 
