@@ -146,22 +146,22 @@
   }
 
   async function deleteNote(note: Note) {
-    const {id, origin, context} = note
+    const {id, origin, context: note_context} = note
 
     const notes = await browser.storage.sync.get(origin)
       .then(notes => notes[origin]) as Notes
 
-    if (notes[context] === undefined) {
+    if (notes[note_context] === undefined) {
       return
     }
 
-    let note_index = notes[context].findIndex((n: Note) => n.id === id)
+    let note_index = notes[note_context].findIndex((n: Note) => n.id === id)
 
     if (note_index === -1) {
       return
     }
 
-    notes[context].splice(note_index, 1)
+    notes[note_context].splice(note_index, 1)
 
     await browser.storage.sync.set({
       [origin]: notes,
@@ -197,7 +197,23 @@
       notes[context] = notes[context].filter((note: Note) => note.url === url)
     }
 
-    return notes[context]
+    let note_list = notes[context]
+
+    if (context === 'website') {
+      const page_notes = notes['page']
+      if (page_notes.length) {
+        note_list = [...note_list, {
+          id: 'separator',
+          content: 'Page notes',
+          context: 'page',
+          origin: origin,
+          url: '',
+        }]
+      }
+      note_list = [...note_list, ...notes['page']]
+    }
+
+    return note_list
   }
 
   $effect(() => {
@@ -278,12 +294,21 @@
   </div>
 
   <div class="notes flex flex-col gap-2">
-      {#each notes_list as note (note.id)}
-        {@const {id, content} = note}
+    {#each notes_list as note (note.id)}
+      {@const {id, content, context: note_context, url} = note}
+      {#if id === 'separator'}
+        <hr class="text-base-content/30"/>
+        <h2 class="text-center text-base-content/60">{content}</h2>
+      {:else}
         <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent">
           <Editor {id} {content} onchange={saveNote(note)}/>
 
           <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
+            {#if url && note_context !== context && context !== 'page'}
+              <a target="_blank" href={url} title={url} class="btn btn-xs btn-secondary">
+                <Icon icon="ic:baseline-open-in-new"/>
+              </a>
+            {/if}
             <button class="btn btn-xs btn-error"
                     onclick={() => {
                       if(confirm('Are you sure?')) {
@@ -295,13 +320,14 @@
             </button>
           </div>
         </div>
-      {:else}
-        <div
-            class="group relative border-2 border-base-300 text-base-content/60 p-2 bg-base-200 rounded-lg flex items-center gap-1">
-          <Icon icon="ic:baseline-speaker-notes-off"/>
-          Click the button below to add a note in the current context.
-        </div>
-      {/each}
+      {/if}
+    {:else}
+      <div
+          class="group relative border-2 border-base-300 text-base-content/60 p-2 bg-base-200 rounded-lg flex items-center gap-1">
+        <Icon icon="ic:baseline-speaker-notes-off"/>
+        Click the button below to add a note in the current context.
+      </div>
+    {/each}
   </div>
 
   <div class="flex gap-2 p-2">
