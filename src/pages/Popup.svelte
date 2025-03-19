@@ -170,12 +170,14 @@
 
   async function filterNotes(context: Context, context_url: string) {
     let origin = ''
+    let url = ''
     if (context === 'global') {
       origin = 'global'
     } else if (context === 'page') {
       if (context_url) {
         const page_url = new URL(context_url)
         origin = page_url.origin
+        url = getPageUrl(page_url)
       }
     } else if (context === 'website') {
       if (context_url) {
@@ -187,6 +189,10 @@
     const notes = await browser.storage.sync.get(origin).then(notes => notes[origin]) as Notes
     if (!notes) {
       return []
+    }
+
+    if(url) {
+      notes[context] = notes[context].filter((note: Note) => note.url === url)
     }
 
     return notes[context]
