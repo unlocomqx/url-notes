@@ -2,12 +2,13 @@
   import Icon from "@iconify/svelte"
   import {type Context} from "../db"
   import Editor from "../lib/Editor.svelte"
-  import browser from "webextension-polyfill"
+  import browser, {type Tabs} from "webextension-polyfill"
   import {onMount} from "svelte"
   import ThemeController from "../lib/ThemeController.svelte"
 
   let context = $state<Context>('page')
   let context_url = $state<string>('')
+  let current_tab = 0
 
   type Note = {
     id: string
@@ -97,7 +98,7 @@
 
         const [{result}] = selection
 
-        if(!result) {
+        if (!result) {
           return
         }
 
@@ -191,7 +192,7 @@
       return []
     }
 
-    if(url) {
+    if (url) {
       notes[context] = notes[context].filter((note: Note) => note.url === url)
     }
 
@@ -222,6 +223,7 @@
     browser.tabs.query({active: true, currentWindow: true})
       .then((tabs) => {
         const tab = tabs[0]
+        current_tab = tab.id || 0
         context_url = tab.url || ''
         if (context_url) {
           const url = new URL(context_url)
@@ -234,6 +236,18 @@
           }
         }
       })
+
+    let handleTabChange = (id: number, _, tab: Tabs.Tab) => {
+      if (id === current_tab) {
+        context_url = tab.url || ''
+        note_rows = filterNotes(context, context_url)
+      }
+    }
+    browser.tabs.onUpdated.addListener(handleTabChange)
+
+    return () => {
+      browser.tabs.onUpdated.removeListener(handleTabChange)
+    }
   })
 
   $effect(() => {
@@ -258,7 +272,8 @@
       <input aria-label="Global" bind:group={context} class="tab" name="context" type="radio" value="global"/>
     </div>
     <ThemeController/>
-    <a href="https://github.com/unlocomqx/url-notes" target="_blank" class="btn btn-primary btn-sm" title="Open GitHub repo">
+    <a class="btn btn-primary btn-sm" href="https://github.com/unlocomqx/url-notes" target="_blank"
+       title="Open GitHub repo">
       <Icon icon="mdi:github"/>
     </a>
   </div>
