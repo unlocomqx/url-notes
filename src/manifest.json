@@ -3,7 +3,7 @@
   "{{firefox}}.manifest_version": 2,
   "name": "Notes by URL",
   "description": "A simple note-taking extension that allows you to take notes on any webpage.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "icons": {
     "16": "icon/icon16.png",
     "32": "icon/icon32.png",
