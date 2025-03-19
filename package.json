@@ -1,7 +1,7 @@
 {
   "name": "notes_by_url",
   "private": true,
-  "version": "1.0.10",
+  "version": "1.1.10",
   "type": "module",
   "scripts": {
     "dev": "vite",
