@@ -1,12 +1,13 @@
 {
   "name": "notes_by_url",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "release": "commit-and-tag-version"
   },
   "devDependencies": {
     "@iconify/svelte": "^4.2.0",
@@ -19,6 +20,7 @@
     "@tiptap/extension-underline": "^2.11.5",
     "@tsconfig/svelte": "^5.0.4",
     "@types/webextension-polyfill": "^0.12.3",
+    "commit-and-tag-version": "^12.5.0",
     "daisyui": "^5.0.4",
     "svelte": "^5.22.6",
     "svelte-check": "^4.1.5",
