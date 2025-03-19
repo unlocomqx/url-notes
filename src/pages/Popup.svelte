@@ -9,6 +9,7 @@
   let context = $state<Context>('page')
   let context_url = $state<string>('')
   let current_tab = 0
+  let notes_list = $state<Note[]>([])
 
   type Note = {
     id: string
@@ -70,7 +71,7 @@
       [origin]: notes,
     })
 
-    note_rows = filterNotes(context, context_url)
+    notes_list = await filterNotes(context, context_url)
   }
 
   async function addNoteFromClipboard() {
@@ -166,7 +167,7 @@
       [origin]: notes,
     })
 
-    note_rows = filterNotes(context, context_url)
+    notes_list = await filterNotes(context, context_url)
   }
 
   async function filterNotes(context: Context, context_url: string) {
@@ -199,14 +200,12 @@
     return notes[context]
   }
 
-  let note_rows = $state(filterNotes(context, context_url))
-
   $effect(() => {
-    note_rows = filterNotes(context, context_url)
+    filterNotes(context, context_url).then(notes => notes_list = notes)
   })
 
   onMount(() => {
-    browser.storage.onChanged.addListener((changes, namespace) => {
+    browser.storage.onChanged.addListener((_, namespace) => {
       if (namespace !== 'sync') {
         return
       }
@@ -237,10 +236,10 @@
         }
       })
 
-    let handleTabChange = (id: number, _, tab: Tabs.Tab) => {
+    let handleTabChange = async (id: number, _, tab: Tabs.Tab) => {
       if (id === current_tab) {
         context_url = tab.url || ''
-        note_rows = filterNotes(context, context_url)
+        notes_list = await filterNotes(context, context_url)
       }
     }
     browser.tabs.onUpdated.addListener(handleTabChange)
@@ -279,7 +278,6 @@
   </div>
 
   <div class="notes flex flex-col gap-2">
-    {#await note_rows then notes_list}
       {#each notes_list as note (note.id)}
         {@const {id, content} = note}
         <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent">
@@ -304,7 +302,6 @@
           Click the button below to add a note in the current context.
         </div>
       {/each}
-    {/await}
   </div>
 
   <div class="flex gap-2 p-2">
