@@ -1,13 +1,13 @@
 {
   "name": "notes_by_url",
   "private": true,
-  "version": "1.2.2",
+  "version": "1.2.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "release": "commit-and-tag-version && pnpm run build"
+    "release": "commit-and-tag-version && pnpm run build && node zip.js"
   },
   "devDependencies": {
     "@iconify/svelte": "^4.2.0",
@@ -28,7 +28,8 @@
     "typescript": "~5.8.2",
     "vite": "^6.2.1",
     "vite-plugin-web-extension": "^4.4.3",
-    "webextension-polyfill": "^0.12.0"
+    "webextension-polyfill": "^0.12.0",
+    "zip-a-folder": "^3.1.9"
   },
   "dependencies": {
     "@tiptap/core": "^2.11.5",
