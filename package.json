@@ -1,14 +1,14 @@
 {
   "name": "notes_by_url",
   "private": true,
-  "version": "1.2.12",
+  "version": "1.2.13",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "release-chrome": "TARGET=chrome pnpm run build && node zip.js",
-    "release-firefox": "TARGET=firefox pnpm run build && node zip.js",
+    "release-chrome": "TARGET=chrome pnpm run build && TARGET=chrome node zip.js",
+    "release-firefox": "TARGET=firefox pnpm run build && TARGET=firefox node zip.js",
     "release": "commit-and-tag-version && pnpm run release-chrome && pnpm run release-firefox"
   },
   "devDependencies": {
