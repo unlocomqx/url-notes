@@ -1,11 +1,18 @@
 <script lang="ts">
   import Icon from "@iconify/svelte"
-  import {type Context} from "../db"
   import Editor from "../lib/Editor.svelte"
   import browser, {type Tabs} from "webextension-polyfill"
   import {onMount} from "svelte"
   import ThemeController from "../lib/ThemeController.svelte"
-  import {addNote, addNoteFromClipboard, addNoteFromSelection, getPageUrl, type Note, type Notes} from "../lib/notes"
+  import {
+    addNote,
+    addNoteFromClipboard,
+    addNoteFromSelection,
+    type Context,
+    getPageUrl,
+    type Note,
+    type Notes
+  } from "../lib/notes"
 
   let context = $state<Context>('page')
   let context_url = $state<string>('')

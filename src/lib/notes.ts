@@ -1,7 +1,7 @@
 import browser from "webextension-polyfill"
 import Autolinker from "autolinker"
-import type {Context} from "../db"
 
+export type Context = 'page' | 'website' | 'global'
 export type Note = {
   id: string
   origin: string
