@@ -51,6 +51,7 @@ You can use the following shortcuts to quickly access the extension features:
 
 | Action                     | Shortcut          |
 |----------------------------|-------------------|
+| Open the popup             | `Alt + A`         |
 | Insert note from clipboard | `Alt + Shift + A` |
 | Insert note from selection | `Alt + Shift + V` |
 

@@ -40,6 +40,11 @@
         "mac": "Alt+Shift+V"
       },
       "description": "Add note from clipboard"
+    },
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+A"
+      }
     }
   },
   "background": {
