@@ -5,11 +5,14 @@
   import browser, {type Tabs} from "webextension-polyfill"
   import {onMount} from "svelte"
   import ThemeController from "../lib/ThemeController.svelte"
+  import Autolinker from 'autolinker'
 
   let context = $state<Context>('page')
   let context_url = $state<string>('')
   let current_tab = 0
+  let new_note_id = ''
   let notes_list = $state<Note[]>([])
+  let extra_notes = $state<Note[]>([])
 
   type Note = {
     id: string
@@ -59,19 +62,34 @@
       notes[context] = []
     }
 
-    notes[context].push({
+    const autolinker = new Autolinker({
+      stripPrefix: false,
+      stripTrailingSlash: false,
+      className: 'autolink',
+      newWindow: true,
+      truncate: {
+        length: 50,
+        location: 'smart',
+      },
+    })
+
+    const autolinked_content = autolinker.link(content)
+
+    let new_note = {
       id: new Date().getTime().toString(),
       origin,
       context,
       url,
-      content,
-    })
+      content: autolinked_content,
+    }
+    notes[context].push(new_note)
+    new_note_id = new_note.id
 
     await browser.storage.sync.set({
       [origin]: notes,
     })
 
-    notes_list = await filterNotes(context, context_url)
+    await loadNotes(context, context_url)
   }
 
   async function addNoteFromClipboard() {
@@ -79,6 +97,8 @@
     if (!text) {
       return
     }
+
+    console.log({text})
 
     return addNote(text)
   }
@@ -113,6 +133,8 @@
     if (!text) {
       return
     }
+
+    console.log(text)
 
     addNote(text)
   }
@@ -167,10 +189,10 @@
       [origin]: notes,
     })
 
-    notes_list = await filterNotes(context, context_url)
+    await loadNotes(context, context_url)
   }
 
-  async function filterNotes(context: Context, context_url: string) {
+  async function loadNotes(context: Context, context_url: string) {
     let origin = ''
     let url = ''
     if (context === 'global') {
@@ -197,12 +219,12 @@
       notes[context] = notes[context].filter((note: Note) => note.url === url)
     }
 
-    let note_list = notes[context]
-
+    notes_list = notes[context]
+    extra_notes = []
     if (context === 'website') {
       const page_notes = notes['page']
       if (page_notes.length) {
-        note_list = [...note_list, {
+        extra_notes = [{
           id: 'separator',
           content: 'Page notes',
           context: 'page',
@@ -210,14 +232,12 @@
           url: '',
         }]
       }
-      note_list = [...note_list, ...notes['page']]
+      extra_notes = [...extra_notes, ...page_notes]
     }
-
-    return note_list
   }
 
   $effect(() => {
-    filterNotes(context, context_url).then(notes => notes_list = notes)
+    loadNotes(context, context_url)
   })
 
   onMount(() => {
@@ -255,7 +275,7 @@
     let handleTabChange = async (id: number, _, tab: Tabs.Tab) => {
       if (id === current_tab) {
         context_url = tab.url || ''
-        notes_list = await filterNotes(context, context_url)
+        await loadNotes(context, context_url)
       }
     }
     browser.tabs.onUpdated.addListener(handleTabChange)
@@ -274,6 +294,14 @@
       localStorage.setItem('context', JSON.stringify(contexts))
     }
   })
+
+  function focusNote(node: HTMLDivElement, {id}) {
+    if (id !== new_note_id) {
+      return
+    }
+
+    node.querySelector<HTMLDivElement>('.tiptap')?.focus()
+  }
 </script>
 
 
@@ -293,14 +321,16 @@
     </a>
   </div>
 
-  <div class="notes flex flex-col gap-2">
+  {#snippet notes(notes_list)}
     {#each notes_list as note (note.id)}
       {@const {id, content, context: note_context, url} = note}
       {#if id === 'separator'}
         <hr class="text-base-content/30"/>
         <h2 class="text-center text-base-content/60">{content}</h2>
       {:else}
-        <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent">
+        <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent"
+             use:focusNote={{id}}
+        >
           <Editor {id} {content} onchange={saveNote(note)}/>
 
           <div class="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100">
@@ -328,10 +358,14 @@
         Click the button below to add a note in the current context.
       </div>
     {/each}
+  {/snippet}
+
+  <div class="notes flex flex-col gap-2">
+    {@render notes(notes_list)}
   </div>
 
   <div class="flex gap-2 p-2">
-    <button class="btn btn-primary btn-sm" onclick={() => addNote()}>
+    <button autofocus class="btn btn-primary btn-sm" onclick={() => addNote()}>
       <Icon icon="ic:add"/>
       {#if context === 'page'}
         New page note
@@ -349,6 +383,12 @@
       <Icon icon="mdi:invoice-text-plus-outline"/>
     </button>
   </div>
+
+  {#if extra_notes.length}
+    <div class="notes flex flex-col gap-2">
+      {@render notes(extra_notes)}
+    </div>
+  {/if}
 </div>
 
 <style>
