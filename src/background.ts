@@ -1,8 +1,10 @@
 import browser from "webextension-polyfill"
 
-let handleCommand = (command) => {
+let handleCommand = async (command) => {
   if (command === 'add-note') {
-    browser.runtime.sendMessage({command: 'add-note'})
+    // addNoteFromSelection()
+    await browser.action.openPopup()
+    await browser.runtime.sendMessage({command: 'add-note'})
   }
 }
 

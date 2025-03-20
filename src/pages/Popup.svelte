@@ -46,7 +46,7 @@
       return
     }
 
-    const new_note = await addNote(context,text)
+    const new_note = await addNote(context, text)
     new_note_id = new_note.id
     await loadNotes(context, context_url)
   }
@@ -187,8 +187,18 @@
       }
       browser.tabs.onUpdated.addListener(handleTabChange)
 
+    console.log('start')
+      let handleMessage = ({command}) => {
+        console.log(command)
+        if (command == 'add-note') {
+          // addNoteFromSelection()
+          addNewNoteFromSelection()
+        }
+      }
+      browser.runtime.onMessage.addListener(handleMessage)
       return () => {
         browser.tabs.onUpdated.removeListener(handleTabChange)
+        browser.runtime.onMessage.removeListener(handleMessage)
       }
     }
   )
