@@ -16,19 +16,20 @@ function generateManifest() {
 }
 
 // https://vitejs.dev/config/
+let target = process.env.TARGET || "chrome"
 export default defineConfig({
   plugins: [
     svelte(),
     tailwindcss(),
     webExtension({
       manifest: generateManifest,
-      browser: process.env.TARGET || "chrome",
+      browser: target,
       watchFilePaths: ["package.json", "manifest.json"],
       disableAutoLaunch: true
     }),
   ],
   build:{
-    outDir: process.env.TARGET === "chrome" ? "dist" : "dist-firefox",
+    outDir: target === "chrome" ? "dist-chrome" : "dist-firefox",
     emptyOutDir: true,
   }
 })
