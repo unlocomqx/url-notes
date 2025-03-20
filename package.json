@@ -1,13 +1,13 @@
 {
   "name": "notes_by_url",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.2.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "release": "commit-and-tag-version && run build"
+    "release": "commit-and-tag-version && pnpm run build"
   },
   "devDependencies": {
     "@iconify/svelte": "^4.2.0",
