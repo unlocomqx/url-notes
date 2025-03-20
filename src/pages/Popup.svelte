@@ -187,12 +187,12 @@
       }
       browser.tabs.onUpdated.addListener(handleTabChange)
 
-    console.log('start')
-      let handleMessage = ({command}) => {
-        console.log(command)
-        if (command == 'add-note') {
-          // addNoteFromSelection()
+      let handleMessage = ({command}: any) => {
+        if (command == 'add-note-from-selection') {
           addNewNoteFromSelection()
+        }
+        if (command == 'add-note-from-clipboard') {
+          addNewNoteFromClipboard()
         }
       }
       browser.runtime.onMessage.addListener(handleMessage)

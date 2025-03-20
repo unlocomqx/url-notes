@@ -27,12 +27,19 @@
     "https://*/*"
   ],
   "commands" : {
-    "add-note": {
+    "add-note-from-selection": {
       "suggested_key": {
         "default": "Alt+Shift+A",
         "mac": "Alt+Shift+A"
       },
       "description": "Add note from selection"
+    },
+    "add-note-from-clipboard": {
+      "suggested_key": {
+        "default": "Alt+Shift+V",
+        "mac": "Alt+Shift+V"
+      },
+      "description": "Add note from clipboard"
     }
   },
   "background": {
