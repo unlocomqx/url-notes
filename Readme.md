@@ -44,3 +44,18 @@ A simple note-taking extension that allows you to take notes on any webpage.
 </a>
 
 </div>
+
+## Shortcuts
+
+You can use the following shortcuts to quickly access the extension features:
+
+| Action                     | Shortcut          |
+|----------------------------|-------------------|
+| Insert note from clipboard | `Alt + Shift + A` |
+| Insert note from selection | `Alt + Shift + V` |
+
+You can change the shortcuts in the extensions shorcuts page. 
+
+To access the shortcuts page, go to
+`chrome://extensions/shortcuts` in Chrome or `about:addons` in Firefox and find the extension in the list. You can then
+change the shortcuts to your liking.

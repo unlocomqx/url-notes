@@ -201,8 +201,8 @@
       browser.runtime.onMessage.addListener(handleMessage)
 
       browser.commands.getAll().then((cmds) => {
-        clipboard_command = cmds.filter((cmd) => cmd.name === 'add-note-from-clipboard')
-        selection_command = cmds.filter((cmd) => cmd.name === 'add-note-from-selection')
+        clipboard_command = cmds.find((cmd) => cmd.name === 'add-note-from-clipboard')
+        selection_command = cmds.find((cmd) => cmd.name === 'add-note-from-selection')
       })
 
       return () => {
@@ -303,12 +303,15 @@
       {/if}
     </button>
     <button class="btn btn-primary btn-sm" onclick={addNewNoteFromClipboard}
-            title="Add from clipboard / Press Ctrl+V in this popup Or Press {clipboard_command?.shortcut}">
+            title="Add from clipboard / Press Ctrl+V in this popup">
       <Icon icon="ic:baseline-content-paste"/>
     </button>
     <button class="btn btn-primary btn-sm" onclick={addNewNoteFromSelection} title="Add from current selection">
       <Icon icon="mdi:invoice-text-plus-outline"/>
     </button>
+    <a class="btn btn-primary btn-sm" href="https://github.com/unlocomqx/url-notes#shortcuts" target="_blank" title="Help">
+      <Icon icon="ic:outline-help-outline"/>
+    </a>
   </div>
 
   {#if extra_notes.length}
