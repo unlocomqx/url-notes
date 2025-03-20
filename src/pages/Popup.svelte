@@ -1,7 +1,7 @@
 <script lang="ts">
   import Icon from "@iconify/svelte"
   import Editor from "../lib/Editor.svelte"
-  import browser, {type Tabs} from "webextension-polyfill"
+  import browser, {Commands, type Tabs} from "webextension-polyfill"
   import {onMount} from "svelte"
   import ThemeController from "../lib/ThemeController.svelte"
   import {
@@ -20,6 +20,9 @@
   let new_note_id = ''
   let notes_list = $state<Note[]>([])
   let extra_notes = $state<Note[]>([])
+
+  let clipboard_command = $state<Commands.Command>()
+  let selection_command = $state<Commands.Command>()
 
   async function addNewNote() {
     const new_note = await addNote(context)
@@ -196,6 +199,12 @@
         }
       }
       browser.runtime.onMessage.addListener(handleMessage)
+
+      browser.commands.getAll().then((cmds) => {
+        clipboard_command = cmds.filter((cmd) => cmd.name === 'add-note-from-clipboard')
+        selection_command = cmds.filter((cmd) => cmd.name === 'add-note-from-selection')
+      })
+
       return () => {
         browser.tabs.onUpdated.removeListener(handleTabChange)
         browser.runtime.onMessage.removeListener(handleMessage)
@@ -294,7 +303,7 @@
       {/if}
     </button>
     <button class="btn btn-primary btn-sm" onclick={addNewNoteFromClipboard}
-            title="Add from clipboard (or press ctrl + v)">
+            title="Add from clipboard / Press Ctrl+V in this popup Or Press {clipboard_command?.shortcut}">
       <Icon icon="ic:baseline-content-paste"/>
     </button>
     <button class="btn btn-primary btn-sm" onclick={addNewNoteFromSelection} title="Add from current selection">

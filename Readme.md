@@ -30,3 +30,13 @@ A simple note-taking extension that allows you to take notes on any webpage.
 <img src="./public/screenshots/2-cropped.png" alt="Notes by URL" width="400"/>
 
 </div>
+
+## Install
+
+<a href="https://chrome.google.com/webstore/detail/notes-by-url/kchiinoldifchgoillffgnjmgjaifjpp">
+<img src="https://img.shields.io/chrome-web-store/v/kchiinoldifchgoillffgnjmgjaifjpp?label=Chrome%20Web%20Store&style=flat-square&logo=googlechrome&color=4285F4">
+</a>
+
+<a href="https://addons.mozilla.org/en-US/firefox/addon/notes-by-url/">
+<img src="https://img.shields.io/amo/v/notes-by-url?label=Firefox%20Add-ons&style=flat-square&logo=firefoxbrowser&color=FF7139">
+</a>
