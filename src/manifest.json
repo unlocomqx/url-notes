@@ -26,6 +26,18 @@
     "http://*/*",
     "https://*/*"
   ],
+  "commands" : {
+    "add-note": {
+      "suggested_key": {
+        "default": "Alt+Shift+A",
+        "mac": "Alt+Shift+A"
+      },
+      "description": "Add note from selection"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.ts"
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "notes-by-url@prestalife.net",

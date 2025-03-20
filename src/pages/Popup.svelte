@@ -5,7 +5,7 @@
   import browser, {type Tabs} from "webextension-polyfill"
   import {onMount} from "svelte"
   import ThemeController from "../lib/ThemeController.svelte"
-  import Autolinker from 'autolinker'
+  import {addNote, addNoteFromClipboard, addNoteFromSelection, getPageUrl, type Note, type Notes} from "../lib/notes"
 
   let context = $state<Context>('page')
   let context_url = $state<string>('')
@@ -14,129 +14,34 @@
   let notes_list = $state<Note[]>([])
   let extra_notes = $state<Note[]>([])
 
-  type Note = {
-    id: string
-    origin: string
-    context: Context
-    url: string
-    content: string
-  }
-  type Notes = Record<Context, Note[]>
-
-  async function addNote(content = '') {
-    let url: string | undefined = ''
-    let origin: string = 'global'
-
-    const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0]
-
-    if (context === 'page') {
-      if (tab.url) {
-        const page_url = new URL(tab.url)
-        url = getPageUrl(page_url)
-        origin = page_url.origin
-      }
-    } else if (context === 'website') {
-      if (tab.url) {
-        const page_url = new URL(tab.url)
-        url = page_url.origin
-        origin = page_url.origin
-      }
-    }
-
-    if (!url) {
-      url = ''
-    }
-
-    let notes = await browser.storage.sync.get(origin)
-      .then(notes => notes[origin]) as Notes
-
-    if (!notes?.[context]) {
-      notes = {
-        "page": [],
-        "website": [],
-        "global": [],
-      }
-    }
-
-    if (!notes[context]) {
-      notes[context] = []
-    }
-
-    const autolinker = new Autolinker({
-      stripPrefix: false,
-      stripTrailingSlash: false,
-      className: 'autolink',
-      newWindow: true,
-      truncate: {
-        length: 50,
-        location: 'smart',
-      },
-    })
-
-    const autolinked_content = autolinker.link(content)
-
-    let new_note = {
-      id: new Date().getTime().toString(),
-      origin,
-      context,
-      url,
-      content: autolinked_content,
-    }
-    notes[context].push(new_note)
+  async function addNewNote() {
+    const new_note = await addNote(context)
     new_note_id = new_note.id
-
-    await browser.storage.sync.set({
-      [origin]: notes,
-    })
-
     await loadNotes(context, context_url)
   }
 
-  async function addNoteFromClipboard() {
-    const text = await navigator.clipboard.readText()
-    if (!text) {
-      return
-    }
-
-    console.log({text})
-
-    return addNote(text)
+  async function addNewNoteFromClipboard() {
+    const new_note = await addNoteFromClipboard(context)
+    new_note_id = new_note?.id ?? ''
+    await loadNotes(context, context_url)
   }
 
-  async function addNoteFromSelection() {
-    browser.tabs.query({active: true, currentWindow: true})
-      .then(async (tabs) => {
-        const tab = tabs[0]
-        if (!tab.id) {
-          return
-        }
-        const selection = await browser.scripting.executeScript({
-          target: {tabId: tab.id},
-          func: () => {
-            return window?.getSelection()?.toString()
-          }
-        })
-
-        const [{result}] = selection
-
-        if (!result) {
-          return
-        }
-
-        return addNote(result as string)
-      })
+  async function addNewNoteFromSelection() {
+    const new_note = await addNoteFromSelection(context)
+    new_note_id = new_note?.id ?? ''
+    await loadNotes(context, context_url)
   }
 
-  function pasteNote(e: ClipboardEvent) {
+  async function pasteNote(e: ClipboardEvent) {
     const text = e.clipboardData?.getData('text/plain')
 
     if (!text) {
       return
     }
 
-    console.log(text)
-
-    addNote(text)
+    const new_note = await addNote(context,text)
+    new_note_id = new_note.id
+    await loadNotes(context, context_url)
   }
 
   function saveNote(note: Note) {
@@ -249,41 +154,37 @@
     })
   })
 
-  function getPageUrl(url: URL) {
-    let without_hash = url.href.replace(url.hash, '')
-    return without_hash.replace(/#$/, '')
-  }
-
   onMount(() => {
-    browser.tabs.query({active: true, currentWindow: true})
-      .then((tabs) => {
-        const tab = tabs[0]
-        current_tab = tab.id || 0
-        context_url = tab.url || ''
-        if (context_url) {
-          const url = new URL(context_url)
-          let stored_contexts = localStorage.getItem('context')
-          let contexts = JSON.parse(stored_contexts || '{}')
-          if (contexts[url.origin]) {
-            context = contexts[url.origin]
-          } else {
-            context = 'page'
+      browser.tabs.query({active: true, currentWindow: true})
+        .then((tabs) => {
+          const tab = tabs[0]
+          current_tab = tab.id || 0
+          context_url = tab.url || ''
+          if (context_url) {
+            const url = new URL(context_url)
+            let stored_contexts = localStorage.getItem('context')
+            let contexts = JSON.parse(stored_contexts || '{}')
+            if (contexts[url.origin]) {
+              context = contexts[url.origin]
+            } else {
+              context = 'page'
+            }
           }
-        }
-      })
+        })
 
-    let handleTabChange = async (id: number, _, tab: Tabs.Tab) => {
-      if (id === current_tab) {
-        context_url = tab.url || ''
-        await loadNotes(context, context_url)
+      let handleTabChange = async (id: number, _, tab: Tabs.Tab) => {
+        if (id === current_tab) {
+          context_url = tab.url || ''
+          await loadNotes(context, context_url)
+        }
+      }
+      browser.tabs.onUpdated.addListener(handleTabChange)
+
+      return () => {
+        browser.tabs.onUpdated.removeListener(handleTabChange)
       }
     }
-    browser.tabs.onUpdated.addListener(handleTabChange)
-
-    return () => {
-      browser.tabs.onUpdated.removeListener(handleTabChange)
-    }
-  })
+  )
 
   $effect(() => {
     if (context_url) {
@@ -365,7 +266,7 @@
   </div>
 
   <div class="flex gap-2 p-2">
-    <button autofocus class="btn btn-primary btn-sm" onclick={() => addNote()}>
+    <button autofocus class="btn btn-primary btn-sm" onclick={() => addNewNote()}>
       <Icon icon="ic:add"/>
       {#if context === 'page'}
         New page note
@@ -375,11 +276,11 @@
         New global note
       {/if}
     </button>
-    <button class="btn btn-primary btn-sm" onclick={addNoteFromClipboard}
+    <button class="btn btn-primary btn-sm" onclick={addNewNoteFromClipboard}
             title="Add from clipboard (or press ctrl + v)">
       <Icon icon="ic:baseline-content-paste"/>
     </button>
-    <button class="btn btn-primary btn-sm" onclick={addNoteFromSelection} title="Add from current selection">
+    <button class="btn btn-primary btn-sm" onclick={addNewNoteFromSelection} title="Add from current selection">
       <Icon icon="mdi:invoice-text-plus-outline"/>
     </button>
   </div>
