@@ -60,5 +60,6 @@
       "id": "notes-by-url@prestalife.net",
       "strict_min_version": "58.0"
     }
-  }
+  },
+  "options_page": "src/options.html"
 }

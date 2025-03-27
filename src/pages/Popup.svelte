@@ -264,6 +264,12 @@
        title="Open GitHub repo">
       <Icon icon="mdi:github"/>
     </a>
+    <a class="btn btn-primary btn-sm"
+       href={browser.runtime.getURL('src/options.html')}
+       target="_blank"
+       title="Open options page">
+      <Icon icon="ic:twotone-settings"/>
+    </a>
   </div>
 
   {#snippet notes(notes_list)}
