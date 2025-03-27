@@ -281,8 +281,10 @@
     {:else}
       <div
           class="group relative border-2 border-base-300 text-base-content/60 p-2 bg-base-200 rounded-lg flex items-center gap-1">
-        <Icon icon="ic:baseline-speaker-notes-off"/>
-        Click the button below to add a note in the current context.
+        <button class="btn btn-xs btn-ghost" onclick={() => addNewNote()}>
+          <Icon icon="ic:baseline-speaker-notes-off"/>
+          Click the button below to add a note in the current context.
+        </button>
       </div>
     {/each}
   {/snippet}
@@ -309,7 +311,8 @@
     <button class="btn btn-primary btn-sm" onclick={addNewNoteFromSelection} title="Add from current selection">
       <Icon icon="mdi:invoice-text-plus-outline"/>
     </button>
-    <a class="btn btn-primary btn-sm" href="https://github.com/unlocomqx/url-notes#shortcuts" target="_blank" title="Help">
+    <a class="btn btn-primary btn-sm" href="https://github.com/unlocomqx/url-notes#shortcuts" target="_blank"
+       title="Help">
       <Icon icon="ic:outline-help-outline"/>
     </a>
   </div>
@@ -320,7 +323,3 @@
     </div>
   {/if}
 </div>
-
-<style>
-
-</style>

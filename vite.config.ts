@@ -4,6 +4,8 @@ import webExtension, {readJsonFile} from "vite-plugin-web-extension"
 // @ts-ignore
 import tailwindcss from '@tailwindcss/vite'
 
+console.log('chrome-extension://iojflbachpmialphpfoiiiiencdlhpcn/src/popup.html')
+
 function generateManifest() {
   const manifest = readJsonFile("src/manifest.json")
   const pkg = readJsonFile("package.json")
