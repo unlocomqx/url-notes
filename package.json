@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "release-chrome": "TARGET=chrome pnpm run build && TARGET=chrome node zip.js",
-    "release-firefox": "TARGET=firefox pnpm run build && TARGET=firefox node zip.js",
+    "release-chrome": "TARGET=chrome pnpm run build && TARGET=chrome node zip-extension.js",
+    "release-firefox": "TARGET=firefox pnpm run build && TARGET=firefox node zip-extension.js",
+    "archive-source": "node zip.js src src.zip",
     "release": "commit-and-tag-version && pnpm run release-chrome && pnpm run release-firefox"
   },
   "devDependencies": {

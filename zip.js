@@ -1,5 +1,6 @@
 import { zip } from "zip-a-folder";
 
-const target = process.env.TARGET || "chrome";
+const src = process.argv[2];
+const zip_name = process.argv[3];
 
-await zip(`dist-${target}`, `${target}.zip`);
+await zip(src, zip_name);
