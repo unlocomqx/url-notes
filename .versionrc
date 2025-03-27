@@ -1,4 +1,6 @@
 {
+    "commitUrlFormat":"",
+    "compareUrlFormat":"",
     "bumpFiles": [
         {
             "filename": "package.json",
