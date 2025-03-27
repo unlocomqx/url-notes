@@ -8,10 +8,11 @@ export type Note = {
   context: Context
   url: string
   content: string
+  collapsed: boolean
 }
 export type Notes = Record<Context, Note[]>
 
-export async function addNote(context = '', content = '') {
+export async function addNote(context: Context = 'page', content = '') {
   let url: string | undefined = ''
   let origin: string = 'global'
 
@@ -63,12 +64,13 @@ export async function addNote(context = '', content = '') {
 
   const autolinked_content = autolinker.link(content)
 
-  let new_note = {
+  let new_note: Note = {
     id: new Date().getTime().toString(),
     origin,
     context,
     url,
     content: autolinked_content,
+    collapsed: false
   }
   notes[context].push(new_note)
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import Icon from "@iconify/svelte"
   import Editor from "../lib/Editor.svelte"
-  import browser, {Commands, type Tabs} from "webextension-polyfill"
+  import browser, {type Tabs} from "webextension-polyfill"
   import {onMount} from "svelte"
   import ThemeController from "../lib/ThemeController.svelte"
   import {
@@ -20,9 +20,6 @@
   let new_note_id = ''
   let notes_list = $state<Note[]>([])
   let extra_notes = $state<Note[]>([])
-
-  let clipboard_command = $state<Commands.Command>()
-  let selection_command = $state<Commands.Command>()
 
   async function addNewNote() {
     const new_note = await addNote(context)
@@ -80,6 +77,31 @@
         [origin]: notes,
       })
     }
+  }
+
+  async function collapseNote(note: Note) {
+    const {id, origin, context: note_context} = note
+
+    const notes = await browser.storage.sync.get(origin)
+      .then(notes => notes[origin]) as Notes
+
+    if (notes[note_context] === undefined) {
+      return
+    }
+
+    let note_index = notes[note_context].findIndex((n: Note) => n.id === id)
+
+    if (note_index === -1) {
+      return
+    }
+
+    notes[note_context][note_index].collapsed = !notes[note_context][note_index].collapsed
+
+    await browser.storage.sync.set({
+      [origin]: notes,
+    })
+
+    await loadNotes(context, context_url)
   }
 
   async function deleteNote(note: Note) {
@@ -145,6 +167,7 @@
           context: 'page',
           origin: origin,
           url: '',
+          collapsed: false,
         }]
       }
       extra_notes = [...extra_notes, ...page_notes]
@@ -200,11 +223,6 @@
       }
       browser.runtime.onMessage.addListener(handleMessage)
 
-      browser.commands.getAll().then((cmds) => {
-        clipboard_command = cmds.find((cmd) => cmd.name === 'add-note-from-clipboard')
-        selection_command = cmds.find((cmd) => cmd.name === 'add-note-from-selection')
-      })
-
       return () => {
         browser.tabs.onUpdated.removeListener(handleTabChange)
         browser.runtime.onMessage.removeListener(handleMessage)
@@ -250,12 +268,15 @@
 
   {#snippet notes(notes_list)}
     {#each notes_list as note (note.id)}
-      {@const {id, content, context: note_context, url} = note}
+      {@const {id, content, context: note_context, url, collapsed} = note}
       {#if id === 'separator'}
         <hr class="text-base-content/30"/>
         <h2 class="text-center text-base-content/60">{content}</h2>
       {:else}
-        <div class="group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent"
+        <div class={[
+                "group relative border-2 border-base-300 p-2 bg-base-200 rounded-lg focus-within:border-accent",
+                collapsed && "max-h-10 overflow-hidden",
+             ]}
              use:focusNote={{id}}
         >
           <Editor {id} {content} onchange={saveNote(note)}/>
@@ -266,6 +287,15 @@
                 <Icon icon="ic:baseline-open-in-new"/>
               </a>
             {/if}
+            <button class="btn btn-xs btn-secondary"
+                    title={collapsed ? 'Expand note' : 'Collapse note'}
+                    onclick={() => collapseNote(note)}>
+              {#if collapsed}
+                <Icon icon="ic:baseline-keyboard-arrow-down"/>
+              {:else}
+                <Icon icon="ic:baseline-keyboard-arrow-up"/>
+              {/if}
+            </button>
             <button class="btn btn-xs btn-error"
                     onclick={() => {
                       if(confirm('Are you sure?')) {
