@@ -10,25 +10,29 @@ export type Note = {
   content: string
   collapsed: boolean
 }
-export type Notes = Record<Context, Note[]>
 
-export async function addNote(context: Context = 'page', content = '') {
-  let url: string | undefined = ''
+export async function getContextInfo(context: Context, url?: string) {
   let origin: string = 'global'
+  let key = origin
 
-  const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0]
+  if (!url) {
+    const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0]
+    url = tab.url || ''
+  }
 
   if (context === 'page') {
-    if (tab.url) {
-      const page_url = new URL(tab.url)
+    if (url) {
+      const page_url = new URL(url)
       url = getPageUrl(page_url)
       origin = page_url.origin
+      key = url
     }
   } else if (context === 'website') {
-    if (tab.url) {
-      const page_url = new URL(tab.url)
+    if (url) {
+      const page_url = new URL(url)
       url = page_url.origin
       origin = page_url.origin
+      key = origin
     }
   }
 
@@ -36,19 +40,17 @@ export async function addNote(context: Context = 'page', content = '') {
     url = ''
   }
 
-  let notes = await browser.storage.sync.get(origin)
-    .then(notes => notes[origin]) as Notes
+  return {url, origin, key}
+}
 
-  if (!notes?.[context]) {
-    notes = {
-      "page": [],
-      "website": [],
-      "global": [],
-    }
-  }
+export async function addNote(context: Context = 'page', content = '') {
+  let {url, origin, key} = await getContextInfo(context)
 
-  if (!notes[context]) {
-    notes[context] = []
+  let notes = await browser.storage.sync.get(key)
+    .then(notes => notes[key]) as Note[]
+
+  if (!notes) {
+    notes = []
   }
 
   const autolinker = new Autolinker({
@@ -72,10 +74,10 @@ export async function addNote(context: Context = 'page', content = '') {
     content: autolinked_content,
     collapsed: false
   }
-  notes[context].push(new_note)
+  notes.push(new_note)
 
   await browser.storage.sync.set({
-    [origin]: notes,
+    [key]: notes,
   })
 
   return new_note

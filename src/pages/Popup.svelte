@@ -9,9 +9,8 @@
     addNoteFromClipboard,
     addNoteFromSelection,
     type Context,
-    getPageUrl,
-    type Note,
-    type Notes
+    getContextInfo,
+    type Note
   } from "../lib/notes"
 
   let context = $state<Context>('page')
@@ -53,125 +52,112 @@
 
   function saveNote(note: Note) {
     return async (new_content: string) => {
-      const {id, origin, context} = note
+      const {id, origin, context, url} = note
+      let {key} = await getContextInfo(context, url)
 
-      const notes = await browser.storage.sync.get(origin)
-        .then(notes => notes[origin]) as Notes
+      const notes = await browser.storage.sync.get(key)
+        .then(notes => notes[key]) as Note[]
 
-      if (notes[context] === undefined) {
+      if (!notes) {
         return
       }
 
-      let note_index = notes[context].findIndex((n: Note) => n.id === id)
+      let note_index = notes.findIndex((n: Note) => n.id === id)
 
       if (note_index === -1) {
         return
       }
 
-      notes[context][note_index] = {
-        ...notes[context][note_index],
+      notes[note_index] = {
+        ...notes[note_index],
         content: new_content,
       }
 
       await browser.storage.sync.set({
-        [origin]: notes,
+        [key]: notes,
       })
     }
   }
 
   async function collapseNote(note: Note) {
-    const {id, origin, context: note_context} = note
+    const {id, context: note_context, url} = note
+    let {key} = await getContextInfo(context, url)
 
-    const notes = await browser.storage.sync.get(origin)
-      .then(notes => notes[origin]) as Notes
+    const notes = await browser.storage.sync.get(key)
+      .then(notes => notes[key]) as Note[]
 
-    if (notes[note_context] === undefined) {
+    if (!notes) {
       return
     }
 
-    let note_index = notes[note_context].findIndex((n: Note) => n.id === id)
+    let note_index = notes.findIndex((n: Note) => n.id === id)
 
     if (note_index === -1) {
       return
     }
 
-    notes[note_context][note_index].collapsed = !notes[note_context][note_index].collapsed
+    notes[note_index].collapsed = !notes[note_index].collapsed
 
     await browser.storage.sync.set({
-      [origin]: notes,
+      [key]: notes,
     })
 
     await loadNotes(context, context_url)
   }
 
   async function deleteNote(note: Note) {
-    const {id, origin, context: note_context} = note
+    const {id, context: note_context, url} = note
+    let {key} = await getContextInfo(note_context, url)
 
-    const notes = await browser.storage.sync.get(origin)
-      .then(notes => notes[origin]) as Notes
+    const notes = await browser.storage.sync.get(key)
+      .then(notes => notes[key]) as Note[]
 
-    if (notes[note_context] === undefined) {
+    if (!notes) {
       return
     }
 
-    let note_index = notes[note_context].findIndex((n: Note) => n.id === id)
+    let note_index = notes.findIndex((n: Note) => n.id === id)
 
     if (note_index === -1) {
       return
     }
 
-    notes[note_context].splice(note_index, 1)
+    notes.splice(note_index, 1)
 
     await browser.storage.sync.set({
-      [origin]: notes,
+      [key]: notes,
     })
 
     await loadNotes(context, context_url)
   }
 
   async function loadNotes(context: Context, context_url: string) {
-    let origin = ''
-    let url = ''
+    let {key} = await getContextInfo(context, context_url)
+
+    let notes: Note[] = []
+
     if (context === 'global') {
-      origin = 'global'
-    } else if (context === 'page') {
-      if (context_url) {
-        const page_url = new URL(context_url)
-        origin = page_url.origin
-        url = getPageUrl(page_url)
+      const keys = await browser.storage.sync.getKeys()
+      for (const key of keys) {
+        notes = notes.concat(await browser.storage.sync.get(key).then(notes => notes[key]) as Note[])
       }
     } else if (context === 'website') {
-      if (context_url) {
-        const page_url = new URL(context_url)
-        origin = page_url.origin
+      const keys = await browser.storage.sync.getKeys()
+      for (const key of keys) {
+        if (key.startsWith(key)) {
+          notes = notes.concat(await browser.storage.sync.get(key).then(notes => notes[key]) as Note[])
+        }
       }
+    } else if (context === 'page') {
+      notes = await browser.storage.sync.get(key).then(notes => notes[key]) as Note[]
     }
 
-    const notes = await browser.storage.sync.get(origin).then(notes => notes[origin]) as Notes
     if (!notes) {
       return []
     }
 
-    if (url) {
-      notes[context] = notes[context].filter((note: Note) => note.url === url)
-    }
-
-    notes_list = notes[context]
+    notes_list = notes
     extra_notes = []
-    if (context === 'website') {
-      const page_notes = notes['page']
-      if (page_notes.length) {
-        extra_notes = [{
-          id: 'separator',
-          content: 'Page notes',
-          context: 'page',
-          origin: origin,
-          url: '',
-          collapsed: false,
-        }]
-      }
-      extra_notes = [...extra_notes, ...page_notes]
-    }
   }
 
   $effect(() => {
