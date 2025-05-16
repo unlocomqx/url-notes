@@ -86,8 +86,9 @@
         ]
         for (const note of all_notes) {
           const {key} = await getContextInfo(note.context, note.url)
+          const existing_notes = await browser.storage.sync.get(key).then(notes => notes[key]) || []
           await browser.storage.sync.set({
-            [key]: note,
+            [key]: [...(existing_notes as Note[]), note],
           })
         }
       }
